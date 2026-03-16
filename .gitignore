@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Environment Variables
+.env
+backend/.env
+frontend/.env
+
+# Build outputs
+dist/
+build/
+frontend/dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# VS Code / IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace

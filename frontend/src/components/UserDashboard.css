@@ -1,0 +1,664 @@
+:root {
+    --sidebar-bg: #ffffff;
+    --main-bg: #f8fafc;
+    --accent-blue: #5b89de;
+    --accent-hover: #4a78cc;
+    --text-dark: #1e293b;
+    --text-light: #64748b;
+    --header-blue: #2d6cd1;
+}
+
+.user-layout {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--main-bg);
+    color: var(--text-dark);
+    font-family: 'Inter', sans-serif;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 260px;
+    background: var(--sidebar-bg);
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 0;
+    position: fixed;
+    height: 100vh;
+    box-sizing: border-box;
+}
+
+.sidebar-logo {
+    padding: 0 2rem;
+    margin-bottom: 3rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sidebar-logo img {
+    width: 40px;
+    height: 40px;
+}
+
+.sidebar-menu {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 1rem;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 1.5rem;
+    border-radius: 12px;
+    color: var(--text-light);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.menu-item:hover {
+    background: #f1f5f9;
+    color: var(--accent-blue);
+}
+
+.menu-item.active {
+    background: #eff6ff;
+    color: var(--accent-blue);
+    border-left: 4px solid var(--accent-blue);
+    border-radius: 0 12px 12px 0;
+}
+
+.logout-item {
+    margin-top: auto;
+    color: #ef4444;
+}
+
+/* Main Content */
+.main-wrapper {
+    margin-left: 260px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.top-header {
+    height: 80px;
+    background: var(--header-blue);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    color: white;
+}
+
+.search-box {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 400px;
+}
+
+.search-box input {
+    background: transparent;
+    border: none;
+    color: white;
+    width: 100%;
+}
+
+.search-box input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.user-profile-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-align: right;
+}
+
+.user-profile-header .name {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.user-profile-header .id {
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+
+/* Content Area */
+.content-area {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent-blue);
+    cursor: pointer;
+    margin-bottom: 2rem;
+    font-weight: 500;
+}
+
+/* Doctor Card */
+.doctor-info-card {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+}
+
+.doctor-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.doc-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.doc-specialty {
+    background: #e0eaff;
+    color: var(--accent-blue);
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+    margin: 5px 0;
+}
+
+.hospital-name {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Calendar Section */
+.booking-section {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.section-title h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    text-align: center;
+}
+
+.calendar-day-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-light);
+    text-transform: uppercase;
+    padding: 10px 0;
+}
+
+.calendar-day {
+    padding: 15px 0;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.calendar-day:hover {
+    background: #f1f5f9;
+}
+
+.calendar-day.selected {
+    background: var(--accent-blue);
+    color: white;
+}
+
+.calendar-day.muted {
+    color: #cbd5e1;
+}
+
+.calendar-day.today {
+    color: #ef4444;
+}
+
+/* Time Section */
+.time-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
+}
+
+.time-slot {
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    background: white;
+}
+
+.time-slot:hover {
+    border-color: var(--accent-blue);
+    background: #f8fafc;
+}
+
+.time-slot.selected {
+    background: var(--accent-blue);
+    color: white;
+    border-color: var(--accent-blue);
+}
+
+.time-slot.booked {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: #f1f5f9;
+}
+
+.book-btn-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 2rem;
+}
+
+.confirm-booking-btn {
+    background: var(--accent-blue);
+    color: white;
+    padding: 12px 30px;
+    border-radius: 12px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(91, 137, 222, 0.3);
+    width: auto;
+    margin-top: 0;
+}
+
+.confirm-booking-btn:disabled {
+    background: #cbd5e1;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+/* Doctor List Card */
+.doctor-list-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.doctor-item-card {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: transform 0.2s;
+    border: 1px solid transparent;
+}
+
+.doctor-item-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-blue);
+}
+
+/* Appointment View Styles */
+.appointments-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+    text-align: left;
+}
+
+.tabs-container {
+    display: flex;
+    gap: 30px;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 2.5rem;
+}
+
+.tab-item {
+    padding: 10px 0;
+    font-weight: 700;
+    color: #94a3b8;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+}
+
+.tab-item.active {
+    color: #5b89de;
+}
+
+.tab-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: #5b89de;
+    border-radius: 99px;
+}
+
+.appointment-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+    position: relative;
+    border-left: 8px solid transparent;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+}
+
+.appointment-card.near {
+    border-left-color: #ef4444;
+    /* Red */
+}
+
+.appointment-card.far {
+    border-left-color: #10b981;
+    /* Green */
+}
+
+.appt-info {
+    flex: 1;
+}
+
+.appt-date-time {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-top: 8px;
+    font-weight: 500;
+}
+
+.appt-badge {
+    position: absolute;
+    top: 1.5rem;
+    right: 2rem;
+    padding: 4px 15px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: white;
+}
+
+.appt-badge.near {
+    background: #ef4444;
+}
+
+.appt-badge.far {
+    background: #10b981;
+}
+
+/* Chat Layout Styles */
+.chat-container {
+    display: flex;
+    height: calc(100vh - 160px);
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.chat-sidebar {
+    width: 300px;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #fcfcfc;
+}
+
+.chat-header-info {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.messages-list {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.msg-bubble {
+    max-width: 70%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    position: relative;
+}
+
+.msg-bubble.sent {
+    align-self: flex-end;
+    background: #5b89de;
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.msg-bubble.received {
+    align-self: flex-start;
+    background: #e2e8f0;
+    color: #1e293b;
+    border-bottom-left-radius: 4px;
+}
+
+.chat-input-area {
+    padding: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    gap: 12px;
+}
+
+.chat-input-area input {
+    flex: 1;
+    padding: 12px 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    background: white;
+    color: #1e293b;
+}
+
+.send-msg-btn {
+    background: #5b89de;
+    color: white;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.send-msg-btn:hover {
+    transform: scale(1.05);
+}
+
+.chat-user-item {
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.chat-user-item:hover,
+.chat-user-item.active {
+    background: #eff6ff;
+}
+
+.chat-user-item .doc-details {
+    flex: 1;
+}
+
+.chat-user-item .name {
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.chat-user-item .special {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+/* Notification Styles */
+.notification-bell-wrapper {
+    position: relative;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.notification-bell-wrapper:hover {
+    background: #f1f5f9;
+}
+
+.notification-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: #ef4444;
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    border: 2px solid white;
+}
+
+.notifications-dropdown {
+    position: absolute;
+    top: 120%;
+    right: 0;
+    width: 300px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.dropdown-header {
+    padding: 1rem;
+    font-weight: 800;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.9rem;
+    color: #1e293b;
+}
+
+.dropdown-body {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.notification-item {
+    padding: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.2s;
+}
+
+.notification-item:hover {
+    background: #fcfcfc;
+}
+
+.notification-item.unread {
+    background: #f0f7ff;
+}
+
+.notification-item p {
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+    color: #1e293b;
+    line-height: 1.4;
+}
+
+.notification-item span {
+    font-size: 0.7rem;
+    color: #94a3b8;
+}
+
+.no-notifications {
+    padding: 2rem;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.85rem;
+}

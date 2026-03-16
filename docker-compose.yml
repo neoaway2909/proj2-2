@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    # Use Azure SQL Edge as it fully supports Mac M1/M2/M3 chips (ARM64) 
+    # and has the same core engine as SQL Server
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    container_name: sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=YourStrongPassword!
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+
+volumes:
+  sqlserver-data:
