@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { ShieldCheck, UserPlus, Users, LogOut, LayoutDashboard, Settings, User } from 'lucide-react';
+import './SuperAdminDashboard.css';
 
 const SuperAdminDashboard = () => {
     const navigate = useNavigate();
     const username = localStorage.getItem('username');
     const token = localStorage.getItem('token');
 
+    const [activeTab, setActiveTab] = useState('manage');
     const [newUsername, setNewUsername] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [newRole, setNewRole] = useState('admin');
@@ -18,7 +21,6 @@ const SuperAdminDashboard = () => {
         navigate('/login');
     };
 
-    // จัดการส่งข้อมูลเพื่อสร้างบัญชีเจ้าหน้าที่ใหม่ (Admin)
     const handleCreateStaff = async (e) => {
         e.preventDefault();
         setMessage('');
@@ -40,38 +42,78 @@ const SuperAdminDashboard = () => {
     };
 
     return (
-        <div className="container dashboard" style={{ maxWidth: '500px' }}>
-            <span className="role-badge" style={{ background: 'rgba(234, 179, 8, 0.2)', color: '#facc15' }}>Super Admin</span>
-            <h2>Super Admin Panel</h2>
-            <p style={{ color: 'var(--text-muted)' }}>Hello {username}, you have full administrative access. You can create Admins.</p>
-            
-            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1.5rem', borderRadius: '12px', marginTop: '2rem', textAlign: 'left' }}>
-                <h3 style={{ marginTop: 0, color: 'var(--text-main)', fontSize: '1.2rem' }}>Create New Staff</h3>
-                {message && <p style={{ color: '#4ade80', fontSize: '0.875rem' }}>{message}</p>}
-                {error && <p style={{ color: '#f87171', fontSize: '0.875rem' }}>{error}</p>}
-                
-                <form onSubmit={handleCreateStaff}>
-                    <div className="form-group">
-                        <label>Username</label>
-                        <input type="text" value={newUsername} onChange={(e) => setNewUsername(e.target.value)} required />
+        <div className="super-admin-layout">
+            <aside className="super-admin-sidebar">
+                <div style={{ padding: '0 2rem', marginBottom: '3rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ background: '#eab308', padding: '8px', borderRadius: '12px' }}>
+                        <ShieldCheck color="white" size={24} />
                     </div>
-                    <div className="form-group">
-                        <label>Password</label>
-                        <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
+                    <span style={{ fontWeight: 800, color: '#ca8a04', fontSize: '1.25rem' }}>SuperPanel</span>
+                </div>
+                <nav className="sidebar-menu">
+                    <div className={`menu-item ${activeTab === 'manage' ? 'active' : ''}`} onClick={() => setActiveTab('manage')}>
+                        <UserPlus size={20} /> จัดการเจ้าหน้าที่
                     </div>
-                    <div className="form-group">
-                        <label>Role</label>
-                        <select value={newRole} onChange={(e) => setNewRole(e.target.value)} disabled>
-                            <option value="admin">Admin</option>
-                        </select>
+                    <div className="menu-item"><Users size={20} /> รายชื่อผู้ใช้</div>
+                    <div className="menu-item"><Settings size={20} /> ตั้งค่าระบบ</div>
+                    <div className="menu-item logout-item" onClick={handleLogout} style={{ marginTop: 'auto' }}>
+                        <LogOut size={20} /> ออกจากระบบ
                     </div>
-                    <button type="submit" style={{ background: '#eab308' }}>Create Account</button>
-                </form>
-            </div>
+                </nav>
+            </aside>
 
-            <button onClick={handleLogout} style={{ background: '#334155', marginTop: '2rem' }}>Logout</button>
+            <main className="super-admin-main">
+                <div className="super-admin-content">
+                    <header className="header-section">
+                        <h1>ยินดีต้อนรับ, {username} 👋</h1>
+                        <p>คุณมีสิทธิ์เข้าถึงระบบสูงสุด สามารถจัดการบัญชีแอดมินและดูแลความเรียบร้อยของระบบ</p>
+                    </header>
+
+                    <div className="stats-grid">
+                        <div className="stat-card">
+                            <span className="label">จำนวนแอดมิน</span>
+                            <span className="value">12</span>
+                        </div>
+                        <div className="stat-card">
+                            <span className="label">ผู้ใช้ทั้งหมด</span>
+                            <span className="value">1,240</span>
+                        </div>
+                        <div className="stat-card">
+                            <span className="label">รายงานวันนี้</span>
+                            <span className="value">45</span>
+                        </div>
+                    </div>
+
+                    <div className="create-staff-card">
+                        <h2>สร้างบัญชีเจ้าหน้าที่ใหม่ (Admin)</h2>
+                        {message && <div className="alert alert-success">{message}</div>}
+                        {error && <div className="alert alert-error">{error}</div>}
+                        
+                        <form onSubmit={handleCreateStaff}>
+                            <div className="form-grid">
+                                <div className="form-group">
+                                    <label>ชื่อผู้ใช้งาน (Username)</label>
+                                    <input type="text" value={newUsername} onChange={(e) => setNewUsername(e.target.value)} required placeholder="ระบุชื่อผู้ใช้งาน" />
+                                </div>
+                                <div className="form-group">
+                                    <label>รหัสผ่าน (Password)</label>
+                                    <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required placeholder="ระบุรหัสผ่าน" />
+                                </div>
+                                <div className="form-group full-width">
+                                    <label>บทบาท (Role)</label>
+                                    <select value={newRole} onChange={(e) => setNewRole(e.target.value)} disabled>
+                                        <option value="admin">Admin (เจ้าหน้าที่จัดการตารางเวลา)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" className="create-btn">สร้างบัญชีผู้ใช้งาน</button>
+                        </form>
+                    </div>
+                </div>
+            </main>
         </div>
     );
 };
 
 export default SuperAdminDashboard;
+

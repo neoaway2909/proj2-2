@@ -263,7 +263,6 @@ const AdminDashboard = () => {
                     <div className={`menu-item ${activeTab === 'chat' ? 'active' : ''}`} onClick={() => setActiveTab('chat')}>
                         <MessageSquare size={20} /> แชทกับลูกค้า
                     </div>
-                    <div className="menu-item"><Settings size={20} /> ตั้งค่า</div>
                     <div className="menu-item logout-item" onClick={handleLogout} style={{ marginTop: 'auto' }}>
                         <LogOut size={20} /> ออกจากระบบ
                     </div>
