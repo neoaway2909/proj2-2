@@ -7,8 +7,7 @@ import {
     ChevronLeft, ChevronRight, UserPlus, MessageSquare, Send, User
 } from 'lucide-react';
 import './AdminDashboard.css';
-
-const API_BASE_URL = 'http://192.168.1.150:5001/api';
+import { API_BASE_URL, SOCKET_URL } from '../config';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -89,7 +88,7 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         fetchAllData();
-        socketRef.current = io('http://192.168.1.150:5001');
+        socketRef.current = io(SOCKET_URL);
         
         socketRef.current.on('scheduleUpdated', fetchAllData);
 

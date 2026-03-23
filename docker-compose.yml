@@ -1,9 +1,8 @@
 version: '3.8'
 
 services:
+  # ฐานข้อมูล SQL Server
   sqlserver:
-    # Use Azure SQL Edge as it fully supports Mac M1/M2/M3 chips (ARM64) 
-    # and has the same core engine as SQL Server
     image: mcr.microsoft.com/azure-sql-edge:latest
     container_name: sqlserver
     environment:
@@ -13,6 +12,37 @@ services:
       - "1433:1433"
     volumes:
       - sqlserver-data:/var/opt/mssql
+
+  # Backend API
+  backend:
+    build: ./backend
+    container_name: backend-api
+    environment:
+      - DB_SERVER=sqlserver
+      - DB_USER=sa
+      - DB_PASSWORD=YourStrongPassword!
+      - DB_DATABASE=proj2_2
+      - PORT=5001
+      - JWT_SECRET=your_jwt_secret_key
+    ports:
+      - "5001:5001"
+    depends_on:
+      - sqlserver
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  # Frontend Web
+  frontend:
+    build: ./frontend
+    container_name: frontend-web
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
 
 volumes:
   sqlserver-data:

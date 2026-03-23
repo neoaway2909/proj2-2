@@ -76,7 +76,7 @@ import notificationRoutes from './routes/notifications.js';
 // ใช้งานเส้นทาง API ต่างๆ
 app.use('/api', authRoutes);
 app.use('/api', adminRoutes);
-app.use('/api', superadminRoutes);
+app.use('/api/superadmin', superadminRoutes);
 app.use('/api/notifications', (req, res, next) => { console.log('notif hit'); next(); }); // Debug
 app.use('/api', appointmentRoutes);
 app.use('/api', chatRoutes);

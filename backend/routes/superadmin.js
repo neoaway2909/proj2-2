@@ -32,4 +32,38 @@ router.post('/create-staff', authenticateToken, async (req, res) => {
     }
 });
 
+// ดึงจำนวนแอดมินทั้งหมดในระบบ
+router.get('/admin-count', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'superadmin') {
+        return res.status(403).json({ message: 'Superadmin access required' });
+    }
+
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .query("SELECT COUNT(*) as count FROM Users WHERE Role = 'admin'");
+
+        res.json({ count: result.recordset[0].count });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// ดึงรายชื่อแอดมินทั้งหมดในระบบ (ยกเว้นรหัสผ่าน)
+router.get('/admins', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'superadmin') {
+        return res.status(403).json({ message: 'Superadmin access required' });
+    }
+
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .query("SELECT Id, Username, Role FROM Users WHERE Role = 'admin' ORDER BY Id DESC");
+
+        res.json(result.recordset);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 export default router;

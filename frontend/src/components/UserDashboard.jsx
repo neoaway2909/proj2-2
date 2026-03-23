@@ -7,8 +7,7 @@ import {
     Search, Bell, ArrowLeft, ChevronLeft, ChevronRight, Clock, Send
 } from 'lucide-react';
 import './UserDashboard.css';
-
-const API_BASE_URL = 'http://192.168.1.150:5001/api';
+import { API_BASE_URL, SOCKET_URL } from '../config';
 
 const UserDashboard = () => {
     const navigate = useNavigate();
@@ -105,7 +104,7 @@ const UserDashboard = () => {
         fetchMyAppointments();
         fetchNotifications();
         
-        socketRef.current = io('http://192.168.1.150:5001');
+        socketRef.current = io(SOCKET_URL);
         
         socketRef.current.on('scheduleUpdated', () => {
             fetchSlots();

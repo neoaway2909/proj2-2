@@ -41,8 +41,8 @@
    ```
 2. แก้ไขไฟล์ `.env` ในโฟลเดอร์ `backend` ให้ตรงกับ SQL Server ของคุณ:
    ```env
-   DB_USER=your_user
-   DB_PASSWORD=your_password
+   DB_USER=sa
+   DB_PASSWORD=YourStrongPassword!
    DB_SERVER=localhost
    DB_DATABASE=proj2_2
    JWT_SECRET=your_secret_key
@@ -64,7 +64,26 @@
    npm run dev
    ```
 
-## 📱 การใช้งานผ่าน IP Address (Network)
+## � วิธีการติดตั้งผ่าน Docker (สำหรับเพื่อนที่เอาโค้ดไปลง)
+หากต้องการรันทั้งระบบแบบง่ายๆ โดยไม่ต้องติดตั้ง SQL Server ในเครื่องเอง:
+
+1. **ติดตั้ง Docker Desktop:** โหลดได้ที่ [docker.com](https://www.docker.com/)
+2. **รันคำสั่งเพียงครั้งเดียว:**
+   ```bash
+   docker-compose up --build
+   ```
+   *หมายเหตุ: คำสั่งนี้จะสร้าง Database (SQL Server), Backend และ Frontend ให้พร้อมกันทั้งหมด*
+
+3. **เตรียมข้อมูลเริ่มต้น (รันเพียงครั้งเดียว):** เมื่อ Docker รันครบทุกส่วนแล้ว ให้เปิด Termial ใหม่แล้วรัน:
+   ```bash
+   docker exec -it backend-api node setup-db.js
+   ```
+
+4. **เข้าใช้งาน:**
+   - **Frontend:** [http://localhost:5173](http://localhost:5173)
+   - **Backend API:** [http://localhost:5001](http://localhost:5001)
+
+## �📱 การใช้งานผ่าน IP Address (Network)
 หากต้องการให้เครื่องอื่นในเครือข่ายเข้าใช้งานได้:
 1. ตรวจสอบ IP เครื่องโฮสต์ (ตัวอย่าง: `192.168.1.150`)
 2. เข้าใช้งานผ่าน `http://192.168.1.150:5173`

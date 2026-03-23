@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
+import { API_BASE_URL } from '../config';
 
 const Register = () => {
     const [username, setUsername] = useState('');
@@ -11,7 +12,7 @@ const Register = () => {
     const handleRegister = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://192.168.1.150:5001/api/register', { username, password });
+            await axios.post(`${API_BASE_URL}/register`, { username, password });
             alert('Registration successful! Please login.');
             navigate('/login');
         } catch (err) {
