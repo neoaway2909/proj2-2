@@ -5,7 +5,7 @@ import { authenticateToken } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Create Staff Route (SuperAdmin Only)
+// เส้นทางสำหรับสร้างบัญชีเจ้าหน้าที่ (เฉพาะ SuperAdmin เท่านั้น)
 router.post('/create-staff', authenticateToken, async (req, res) => {
     const { username, password, role } = req.body;
 

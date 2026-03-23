@@ -6,7 +6,7 @@ const router = express.Router();
 
 const STANDARD_SLOTS = ["09:00", "10:30", "12:00", "13:30", "15:00", "16:30"];
 
-// Get slots for a specific doctor and date
+// ดึงช่วงเวลาที่ว่างสำหรับหมอคนนั้นๆ และวันที่ระบุ
 router.get('/doctor-slots', async (req, res) => {
     const { doctorId, date } = req.query;
     if (!doctorId || !date) return res.status(400).json({ message: "Missing params" });
@@ -14,13 +14,13 @@ router.get('/doctor-slots', async (req, res) => {
     try {
         const pool = await poolPromise;
 
-        // 1. Get blocked times by admin
+        // 1. ดึงช่วงเวลาที่แอดมินบล็อกไว้ (ไม่ว่าง)
         const blockedRes = await pool.request()
             .input('doctorId', sql.INT, doctorId)
             .input('date', sql.DATE, date)
             .query('SELECT StartTime, EndTime FROM DoctorUnavailable WHERE DoctorId = @doctorId AND UnavailableDate = @date');
 
-        // 2. Get existing appointments
+        // 2. ดึงรายการนัดหมายที่มีการจองไว้แล้ว
         const apptRes = await pool.request()
             .input('doctorId', sql.INT, doctorId)
             .input('date', sql.DATE, date)
@@ -33,10 +33,10 @@ router.get('/doctor-slots', async (req, res) => {
         });
 
         const slots = STANDARD_SLOTS.map(timeStr => {
-            // Check if booked
+            // ตรวจสอบว่าถูกจองไปแล้วหรือยัง
             if (appts.includes(timeStr)) return { time: timeStr, status: 'booked' };
 
-            // Check if admin blocked
+            // ตรวจสอบว่าแอดมินบล็อกไว้หรือไม่
             // timeStr "09:00" vs stored TIME
             const isBlocked = blocked.some(b => {
                 const start = new Date(b.StartTime).toISOString().substring(11, 16);
@@ -55,7 +55,7 @@ router.get('/doctor-slots', async (req, res) => {
     }
 });
 
-// Admin adds unavailable time
+// แอดมินเพิ่มช่วงเวลาที่ไม่ว่างของหมอ
 router.post('/unavailable', authenticateToken, async (req, res) => {
     if (req.user.role !== 'admin') return res.status(403).json({ message: "Admin only" });
     const { doctorId, date, startTime, endTime } = req.body;
@@ -76,14 +76,14 @@ router.post('/unavailable', authenticateToken, async (req, res) => {
     }
 });
 
-// User books a slot
+// ผู้ใช้ทำการจองช่วงเวลา
 router.post('/book', authenticateToken, async (req, res) => {
     const { doctorId, date, time } = req.body;
     const userId = req.user.id;
 
     try {
         const pool = await poolPromise;
-        // Check if already taken
+        // ตรวจสอบว่ามีคนจองไปก่อนหน้านี้หรือยังจากฐานข้อมูล (Double check)
         const check = await pool.request()
             .input('doctorId', sql.INT, doctorId)
             .input('date', sql.DATE, date)
@@ -99,11 +99,11 @@ router.post('/book', authenticateToken, async (req, res) => {
             .input('time', sql.VarChar, time)
             .query('INSERT INTO Appointments (UserId, DoctorId, AppointDate, AppointTime) VALUES (@userId, @doctorId, @date, @time)');
 
-        // Get Doctor name for notification
+        // ดึงชื่อหมอเพื่อนำไปใช้ในข้อความแจ้งเตือน
         const docRes = await pool.request().input('did', sql.INT, doctorId).query('SELECT FullName FROM Doctors WHERE Id = @did');
         const docName = docRes.recordset[0]?.FullName || 'Doctor';
 
-        // Add Notification
+        // บันทึกการแจ้งเตือนลงฐานข้อมูลเพื่อให้ผู้ใช้เห็นภายหลัง
         const msg = `คุณจองสำเร็จ! นัดพบ ${docName} วันที่ ${new Date(date).toLocaleDateString()} เวลา ${time}`;
         await pool.request()
             .input('uid', sql.INT, userId)
@@ -111,14 +111,14 @@ router.post('/book', authenticateToken, async (req, res) => {
             .query('INSERT INTO Notifications (UserId, Message) VALUES (@uid, @msg)');
 
         req.app.get('io').emit('scheduleUpdated');
-        req.app.get('io').emit('notification', { userId }); // Notify frontend to refresh notifications
+        req.app.get('io').emit('notification', { userId }); // แจ้งให้ Frontend อัปเดตรายการแจ้งเตือนบนหน้าจอทันที
         res.json({ message: "Appointment booked successfully" });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
 
-// Get all doctors
+// ดึงข้อมูลรายชื่อหมอทั้งหมดในระบบ
 router.get('/doctors', async (req, res) => {
     try {
         const pool = await poolPromise;
@@ -129,7 +129,7 @@ router.get('/doctors', async (req, res) => {
     }
 });
 
-// Helper for Admin dots
+// ดึงวันที่หมอไม่ว่างทั้งหมด (ส่งกลับไปให้แอดมินทำจุดบนปฏิทิน)
 router.get('/blocked-dates', async (req, res) => {
     const { doctorId } = req.query;
     try {
@@ -143,7 +143,7 @@ router.get('/blocked-dates', async (req, res) => {
     }
 });
 
-// Get user appointments
+// ดึงรายการนัดหมายทั้งหมดของผู้ใช้ที่ล็อกอินอยู่
 router.get('/my-appointments', authenticateToken, async (req, res) => {
     const userId = req.user.id;
     try {

@@ -18,13 +18,14 @@ const SuperAdminDashboard = () => {
         navigate('/login');
     };
 
+    // จัดการส่งข้อมูลเพื่อสร้างบัญชีเจ้าหน้าที่ใหม่ (Admin)
     const handleCreateStaff = async (e) => {
         e.preventDefault();
         setMessage('');
         setError('');
         try {
             const config = { headers: { Authorization: `Bearer ${token}` } };
-            const res = await axios.post('http://localhost:5001/api/create-staff', {
+            const res = await axios.post('http://192.168.1.150:5001/api/create-staff', {
                 username: newUsername,
                 password: newPassword,
                 role: newRole

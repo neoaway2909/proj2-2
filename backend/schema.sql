@@ -19,7 +19,7 @@ CREATE TABLE Users (
 );
 GO
 
--- Insert default users (Password for all is 'password123')
+-- เพิ่มผู้ใช้เริ่มต้น (รหัสผ่านสำหรับทุกคนคือ 'password123')
 INSERT INTO Users (Username, Password, Role) VALUES 
 ('superadmin', '$2b$10$w3PGYPlGxWyQku14b45vwOlEYpbOw5qZPxZHBx/MkbwvxYs7Djk1q', 'superadmin'),
 ('admin', '$2b$10$w3PGYPlGxWyQku14b45vwOlEYpbOw5qZPxZHBx/MkbwvxYs7Djk1q', 'admin'),

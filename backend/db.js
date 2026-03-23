@@ -10,8 +10,8 @@ const config = {
     server: process.env.DB_SERVER,
     database: process.env.DB_DATABASE,
     options: {
-        encrypt: true, // For Azure
-        trustServerCertificate: true // For local development
+        encrypt: true, // ตั้งค่าการเข้ารหัส (สำหรับ Azure)
+        trustServerCertificate: true // สำหรับการพัฒนาในเครื่อง (Local)
     }
 };
 

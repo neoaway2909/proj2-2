@@ -24,23 +24,23 @@ const io = new Server(server, {
 
 app.set('io', io);
 
-// Socket.io connection logic
+// ส่วนการเชื่อมต่อ Socket.io
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
 
-    // Join a private room for a specific doctor-patient pair
+    // เข้าร่วมห้องแชทส่วนตัวระหว่างหมอและคนไข้ หรือผู้ใช้และแอดมิน
     socket.on('join-chat', ({ room }) => {
         socket.join(room);
         console.log(`User ${socket.id} joined room: ${room}`);
     });
 
-    // Relay private message to the room
+    // ส่งข้อความส่วนตัวไปยังห้องแชท
     socket.on('send-message', async ({ room, message, sender }) => {
         try {
             const pool = await poolPromise;
             const timestamp = new Date();
 
-            // Save to database
+            // บันทึกข้อความลงฐานข้อมูล
             await pool.request()
                 .input('room', sql.NVarChar, room)
                 .input('sender', sql.NVarChar, sender)
@@ -48,7 +48,7 @@ io.on('connection', (socket) => {
                 .input('timestamp', sql.DateTime, timestamp)
                 .query('INSERT INTO Messages (Room, Sender, Message, Timestamp) VALUES (@room, @sender, @message, @timestamp)');
 
-            // Broadcast to the room
+            // กระจายข้อความให้คนอื่นในห้องแชทนั้นๆ
             io.to(room).emit('receive-message', {
                 room: room,
                 text: message,
@@ -65,7 +65,7 @@ io.on('connection', (socket) => {
     });
 });
 
-// Import Routes
+// นำเข้าเส้นทาง API ต่างๆ
 import authRoutes from './routes/auth.js';
 import adminRoutes from './routes/admin.js';
 import superadminRoutes from './routes/superadmin.js';
@@ -73,7 +73,7 @@ import appointmentRoutes from './routes/appointments.js';
 import chatRoutes from './routes/chat.js';
 import notificationRoutes from './routes/notifications.js';
 
-// Use Routes
+// ใช้งานเส้นทาง API ต่างๆ
 app.use('/api', authRoutes);
 app.use('/api', adminRoutes);
 app.use('/api', superadminRoutes);
@@ -82,11 +82,11 @@ app.use('/api', appointmentRoutes);
 app.use('/api', chatRoutes);
 app.use('/api', notificationRoutes);
 
-// Reminder System (runs every hour)
+// ระบบส่งการแจ้งเตือนนัดหมาย (รันทุกๆ 1 ชั่วโมง)
 const checkReminders = async () => {
     try {
         const pool = await poolPromise;
-        // Find appointments 3 days or 1 day away
+        // ค้นหารายการนัดหมายที่มีกำหนดในอีก 3 วัน หรือ 1 วันข้างหน้า
         const result = await pool.request().query(`
             SELECT a.*, d.FullName 
             FROM Appointments a
@@ -101,7 +101,7 @@ const checkReminders = async () => {
             const daysLeft = Math.ceil((new Date(appt.AppointDate) - new Date()) / (1000 * 60 * 60 * 24));
             const msg = `เตือนนัดหมาย: อีก ${daysLeft} วัน คุณมีนัดกับ ${appt.FullName}`;
 
-            // Check if reminder already sent today to avoid spam
+            // ตรวจสอบว่าวันนี้ส่งการแจ้งเตือนเดิมไปรึยัง เพื่อป้องกันการส่งซ้ำซ้อนในวันเดียวกัน
             const check = await pool.request()
                 .input('uid', sql.INT, appt.UserId)
                 .input('msg', sql.NVarChar, msg)
@@ -120,8 +120,8 @@ const checkReminders = async () => {
     }
 };
 
-setInterval(checkReminders, 1000 * 60 * 60); // Every hour
-checkReminders(); // Run once at start
+setInterval(checkReminders, 1000 * 60 * 60); // รันทุกๆ 1 ชั่วโมง
+checkReminders(); // รันทันทีหนึ่งครั้งเมื่อเริ่มเซิร์ฟเวอร์
 
 server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

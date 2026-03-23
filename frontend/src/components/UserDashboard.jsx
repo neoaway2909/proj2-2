@@ -16,7 +16,7 @@ const UserDashboard = () => {
     const token = localStorage.getItem('token');
     const socketRef = useRef(null);
 
-    const [activeView, setActiveView] = useState('home'); // 'home', 'appointments', 'chat'
+    const [activeView, setActiveView] = useState('home'); // มุมมองปัจจุบัน: 'home', 'appointments', 'chat'
     const [doctors, setDoctors] = useState([]);
     const [selectedDoctor, setSelectedDoctor] = useState(null);
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
@@ -26,12 +26,12 @@ const UserDashboard = () => {
     const [myAppointments, setMyAppointments] = useState([]);
     const [subTab, setSubTab] = useState('upcoming');
 
-    // Chat states
+    // สถานะสำหรับระบบแชท (เก็บข้อความรายห้อง)
     const [chatMessages, setChatMessages] = useState({}); // { roomId: [msgs] }
     const [inputMsg, setInputMsg] = useState('');
     const scrollRef = useRef(null);
 
-    // Notifications state
+    // สถานะสำหรับระบบแจ้งเตือน
     const [notifications, setNotifications] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
 
@@ -113,7 +113,7 @@ const UserDashboard = () => {
         });
 
         socketRef.current.on('notification', (data) => {
-            // In a real app we'd check if data.userId matches current user
+            // ในการใช้งานจริง ควรเช็ค data.userId ให้ตรงกับผู้ใช้ที่ล็อกอินอยู่ด้วย
             fetchNotifications();
         });
 
@@ -191,7 +191,7 @@ const UserDashboard = () => {
         setInputMsg('');
     };
 
-    // Calendar logic
+    // ตรรกะสำหรับการสร้างปฏิทินในแต่ละเดือน
     const daysInMonth = useMemo(() => {
         const year = currentMonth.getFullYear();
         const month = currentMonth.getMonth();

@@ -4,7 +4,7 @@ import { authenticateToken } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Get user notifications
+// ดึงรายการแจ้งเตือนทั้งหมดของตนเองออกมาโชว์ (เรียงลำดับใหม่สุดขึ้นก่อน)
 router.get('/notifications', authenticateToken, async (req, res) => {
     try {
         const pool = await poolPromise;
@@ -17,7 +17,7 @@ router.get('/notifications', authenticateToken, async (req, res) => {
     }
 });
 
-// Mark all as read
+// อัปเดตสถานะแจ้งเตือนทั้งหมดให้เป็น "อ่านแล้ว" (IsRead = 1)
 router.post('/notifications/read', authenticateToken, async (req, res) => {
     try {
         const pool = await poolPromise;

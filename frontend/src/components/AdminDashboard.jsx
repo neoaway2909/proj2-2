@@ -16,14 +16,14 @@ const AdminDashboard = () => {
     const token = localStorage.getItem('token');
     const socketRef = useRef(null);
 
-    const [activeTab, setActiveTab] = useState('schedule'); // 'schedule', 'doctors', 'chat'
+    const [activeTab, setActiveTab] = useState('schedule'); // เมนูที่เลือก: 'schedule', 'doctors', 'chat'
 
-    // Doctor Registration States
+    // สถานะสำหรับการลงทะเบียนแพทย์ใหม่
     const [fullName, setFullName] = useState('');
     const [specialty, setSpecialty] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     
-    // Schedule States
+    // สถานะสำหรับการจัดการตารางเวลาของแพทย์
     const [doctors, setDoctors] = useState([]);
     const [blockedDates, setBlockedDates] = useState([]);
     const [doctorId, setDoctorId] = useState('');
@@ -32,7 +32,7 @@ const AdminDashboard = () => {
     const [endTime, setEndTime] = useState('');
     const [currentMonth, setCurrentMonth] = useState(new Date());
 
-    // Chat States
+    // สถานะสำหรับระบบแชทกับลูกค้า
     const [chatMessages, setChatMessages] = useState({}); // { room: [msgs] }
     const [chatUsers, setChatUsers] = useState([]); // List of user names chatting
     const [selectedUser, setSelectedUser] = useState(null);
@@ -95,7 +95,7 @@ const AdminDashboard = () => {
 
         socketRef.current.on('receive-message', (data) => {
             const { room, text, sender, timestamp } = data;
-            // Extract username from room name 'room_admin_username'
+            // แยกชื่อผู้ใช้ออกมาจากชื่อห้อง (เช่น room_admin_neo -> neo)
             const senderUser = room.replace('room_admin_', '');
             
             setChatUsers(prev => prev.includes(senderUser) ? prev : [...prev, senderUser]);
@@ -169,7 +169,7 @@ const AdminDashboard = () => {
         setInputMsg('');
     };
 
-    // Calendar logic
+    // ตรรกะสำหรับการสร้างปฏิทินในหน้าจัดการตารางเวลา
     const calendarDays = useMemo(() => {
         const year = currentMonth.getFullYear();
         const month = currentMonth.getMonth();

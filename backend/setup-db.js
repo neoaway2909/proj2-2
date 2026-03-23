@@ -7,7 +7,7 @@ const config = {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     server: process.env.DB_SERVER,
-    database: 'master', // connect to master first
+    database: 'master', // เชื่อมต่อไปที่ master ก่อนเพื่อสร้างฐานข้อมูลใหม่
     options: {
         encrypt: true,
         trustServerCertificate: true
@@ -22,7 +22,7 @@ async function setupDatabase() {
         const schemaPath = path.join(__dirname, 'schema.sql');
         let sqlContent = fs.readFileSync(schemaPath, 'utf8');
 
-        // Split statements by GO to execute them separately, as mssql driver does not support GO
+        // แยกคำสั่งด้วย GO เพื่อรันแยกกัน เนื่องจาก mssql driver ไม่รองรับ GO โดยตรง
         const statements = sqlContent.split(/GO\b/i).map(s => s.trim()).filter(stmt => stmt !== '');
 
         for (const statement of statements) {

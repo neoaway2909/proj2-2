@@ -4,7 +4,7 @@ import { authenticateToken } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Add Doctor Route (Admin Only)
+// เส้นทางสำหรับเพิ่มข้อมูลแพทย์ (เฉพาะ Admin เท่านั้น)
 router.post('/add-doctor', authenticateToken, async (req, res) => {
     const { fullName, specialty, phoneNumber } = req.body;
 
@@ -26,7 +26,7 @@ router.post('/add-doctor', authenticateToken, async (req, res) => {
     }
 });
 
-// Admin Only Route Example
+// ตัวอย่างเส้นทางที่เข้าถึงได้เฉพาะ Admin เท่านั้น
 router.get('/admin-only', authenticateToken, (req, res) => {
     if (req.user.role !== 'admin') {
         return res.status(403).json({ message: 'Admin access required' });

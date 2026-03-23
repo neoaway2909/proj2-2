@@ -7,7 +7,7 @@ import { authenticateToken } from '../middleware/authMiddleware.js';
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// Register Route (Public, only creates users)
+// เส้นทางสมัครสมาชิกสำหรับบุคคลทั่วไป (กำหนดบทบาทเป็น 'user' อัตโนมัติเพื่อความปลอดภัย)
 router.post('/register', async (req, res) => {
     const { username, password } = req.body;
     const role = 'user'; // Force role to user for public registration
@@ -28,7 +28,7 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// Login Route
+// เส้นทางเข้าสู่ระบบ ตรวจสอบรหัสผ่านและคืนค่าเป็น JWT Token
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
@@ -56,7 +56,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Protected Route Example
+// เส้นทางทดสอบสำหรับการดึงข้อมูลผู้ใช้จาก Token ที่ล็อกอินอยู่
 router.get('/me', authenticateToken, (req, res) => {
     res.json(req.user);
 });

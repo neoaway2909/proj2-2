@@ -4,7 +4,7 @@ import { authenticateToken } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Get chat history for a specific room
+// ดึงประวัติการแชทรายห้อง (Room) จากฐานข้อมูล
 router.get('/messages/:room', authenticateToken, async (req, res) => {
     const { room } = req.params;
     try {
@@ -19,7 +19,7 @@ router.get('/messages/:room', authenticateToken, async (req, res) => {
     }
 });
 
-// Get list of unique users who have chatted with admin
+// ดึงรายชื่อผู้ใช้ที่เคยแชทกับแอดมิน (ใช้แสดงรายชื่อในแถบด้านข้างของแอดมิน)
 router.get('/chat-users', authenticateToken, async (req, res) => {
     try {
         const pool = await poolPromise;
