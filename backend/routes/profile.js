@@ -36,6 +36,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
 
         res.json(result.recordset[0]);
     } catch (err) {
+        console.error("GET /profile error:", err);
         res.status(500).json({ message: err.message });
     }
 });
@@ -51,7 +52,7 @@ router.put('/profile', authenticateToken, upload.single('profilePic'), async (re
 
     try {
         const pool = await poolPromise;
-        
+
         // ตรวจสอบข้อมูลปัจจุบันก่อน
         const currentData = await pool.request()
             .input('userId', sql.Int, req.user.id)
@@ -74,9 +75,9 @@ router.put('/profile', authenticateToken, upload.single('profilePic'), async (re
                 WHERE Id = @userId
             `);
 
-        res.json({ 
+        res.json({
             message: 'Profile updated successfully',
-            profilePic: finalProfilePic 
+            profilePic: finalProfilePic
         });
     } catch (err) {
         res.status(500).json({ message: err.message });

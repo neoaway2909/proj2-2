@@ -94,11 +94,10 @@ const checkReminders = async () => {
         const pool = await poolPromise;
         // ค้นหารายการนัดหมายที่มีกำหนดในอีก 3 วัน หรือ 1 วันข้างหน้า
         const result = await pool.request().query(`
-            SELECT a.*, d.FullName, ds.AvailableDate
+            SELECT a.*, d.FullName, a.AppointDate as AvailableDate
             FROM Appointments a
-            JOIN DoctorSchedules ds ON a.ScheduleId = ds.Id
-            JOIN Doctors d ON ds.DoctorId = d.Id
-            WHERE ds.AvailableDate IN (
+            JOIN Doctors d ON a.DoctorId = d.Id
+            WHERE a.AppointDate IN (
                 CONVERT(date, DATEADD(day, 3, GETDATE())),
                 CONVERT(date, DATEADD(day, 1, GETDATE()))
             )

@@ -23,19 +23,28 @@ const config = {
 async function setupDatabase() {
     try {
         console.log('Connecting to master. Configuration:', { ...config, password: '***' });
-        const pool = await new sql.ConnectionPool(config).connect();
-        console.log('Connected to master. Running schema.sql...');
+        let pool = await new sql.ConnectionPool(config).connect();
+        console.log('Connected to master. Ensuring database exists...');
+        await pool.request().query(`IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = N'${process.env.DB_DATABASE}') CREATE DATABASE ${process.env.DB_DATABASE}`);
+        await pool.close();
+
+        // 2. เชื่อมต่อไปยังฐานข้อมูลเป้าหมายจริง
+        const targetConfig = { ...config, database: process.env.DB_DATABASE };
+        pool = await new sql.ConnectionPool(targetConfig).connect();
+        console.log(`Connected to ${process.env.DB_DATABASE}. Running remaining schema...`);
 
         const schemaPath = path.join(__dirname, 'schema.sql');
         let sqlContent = fs.readFileSync(schemaPath, 'utf8');
 
-        // แยกคำสั่งด้วย GO เพื่อรันแยกกัน เนื่องจาก mssql driver ไม่รองรับ GO โดยตรง
-        const statements = sqlContent.split(/GO\b/i).map(s => s.trim()).filter(stmt => stmt !== '');
+        // แยกคำสั่งด้วย GO และกรองคำสั่ง USE หรือ CREATE DATABASE ออกเพราะเราทำไปแล้ว
+        const statements = sqlContent.split(/GO\b/i)
+            .map(s => s.trim())
+            .filter(stmt => stmt !== '' && !stmt.toUpperCase().startsWith('USE ') && !stmt.toUpperCase().includes('CREATE DATABASE'));
 
         for (const statement of statements) {
             try {
                 await pool.request().query(statement);
-                console.log('Executed block successfully:\n' + statement.substring(0, 50) + '...');
+                console.log('Executed successfully:\n' + statement.substring(0, 50) + '...');
             } catch (err) {
                 console.error('Error executing block:', statement.substring(0, 50) + '...', err.message);
             }

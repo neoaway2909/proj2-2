@@ -159,6 +159,7 @@ router.get('/my-appointments', authenticateToken, async (req, res) => {
             `);
         res.json(result.recordset);
     } catch (err) {
+        console.error("GET /my-appointments error:", err);
         res.status(500).json({ message: err.message });
     }
 });
