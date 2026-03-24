@@ -7,7 +7,9 @@ import {
     Search, Bell, ArrowLeft, ChevronLeft, ChevronRight, Clock, Send
 } from 'lucide-react';
 import './UserDashboard.css';
-import { API_BASE_URL, SOCKET_URL } from '../config';
+import { API_BASE_URL, SOCKET_URL, UPLOAD_URL } from '../config';
+import Profile from './Profile';
+
 
 const UserDashboard = () => {
     const navigate = useNavigate();
@@ -33,6 +35,18 @@ const UserDashboard = () => {
     // สถานะสำหรับระบบแจ้งเตือน
     const [notifications, setNotifications] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
+    const [profileData, setProfileData] = useState(null);
+
+    const fetchUserProfile = async () => {
+        try {
+            const config = { headers: { Authorization: `Bearer ${token}` } };
+            const res = await axios.get(`${API_BASE_URL}/profile`, config);
+            setProfileData(res.data);
+        } catch (err) {
+            console.error("Fetch profile failed", err);
+        }
+    };
+
 
     const fetchDoctors = async () => {
         try {
@@ -103,8 +117,10 @@ const UserDashboard = () => {
         fetchDoctors();
         fetchMyAppointments();
         fetchNotifications();
+        fetchUserProfile();
         
         socketRef.current = io(SOCKET_URL);
+
         
         socketRef.current.on('scheduleUpdated', () => {
             fetchSlots();
@@ -369,8 +385,9 @@ const UserDashboard = () => {
                     <div className={`menu-item ${activeView === 'home' ? 'active' : ''}`} onClick={() => setActiveView('home')}><Home size={20} /> Home</div>
                     <div className={`menu-item ${activeView === 'appointments' ? 'active' : ''}`} onClick={() => setActiveView('appointments')}><CalendarIcon size={20} /> Appointment</div>
                     <div className={`menu-item ${activeView === 'chat' ? 'active' : ''}`} onClick={() => setActiveView('chat')}><MessageSquare size={20} /> Chat</div>
-                    <div className="menu-item"><User size={20} /> Profile</div>
+                    <div className={`menu-item ${activeView === 'profile' ? 'active' : ''}`} onClick={() => setActiveView('profile')}><User size={20} /> Profile</div>
                     <div className="menu-item logout-item" onClick={handleLogout} style={{ marginTop: 'auto' }}><LogOut size={20} /> Logout</div>
+
                 </nav>
             </aside>
             <main className="main-wrapper">
@@ -400,10 +417,29 @@ const UserDashboard = () => {
                                 </div>
                             )}
                         </div>
-                        <div className="user-profile-header"><div><div className="name">{username}</div><div className="id">ID: 1104400xxx</div></div><div style={{ width: 40, height: 40, borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><User color="#5b89de" size={24} /></div></div>
+                        <div className="user-profile-header" onClick={() => setActiveView('profile')} style={{ cursor: 'pointer' }}>
+                            <div>
+                                <div className="name">{profileData?.FullName || username}</div>
+                                <div className="id">ID: #{profileData?.Id}</div>
+                            </div>
+                            <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px solid #fff' }}>
+                                {profileData?.ProfilePic ? (
+                                    <img src={`${UPLOAD_URL}${profileData.ProfilePic}`} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                ) : (
+                                    <User color="#5b89de" size={24} />
+                                )}
+                            </div>
+                        </div>
+
                     </div>
                 </header>
-                <div className="content-area">{activeView === 'home' ? renderHome() : activeView === 'appointments' ? renderAppointments() : renderChat()}</div>
+                <div className="content-area">
+                    {activeView === 'home' ? renderHome() : 
+                     activeView === 'appointments' ? renderAppointments() : 
+                     activeView === 'chat' ? renderChat() :
+                     <Profile onBack={() => { setActiveView('home'); fetchUserProfile(); }} />}
+                </div>
+
             </main>
         </div>
     );

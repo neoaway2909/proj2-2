@@ -1,7 +1,13 @@
-const fs = require('fs');
-const sql = require('mssql');
-const path = require('path');
-require('dotenv').config();
+import fs from 'fs';
+import sql from 'mssql';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const config = {
     user: process.env.DB_USER,
@@ -16,6 +22,7 @@ const config = {
 
 async function setupDatabase() {
     try {
+        console.log('Connecting to master. Configuration:', { ...config, password: '***' });
         const pool = await new sql.ConnectionPool(config).connect();
         console.log('Connected to master. Running schema.sql...');
 
@@ -43,3 +50,4 @@ async function setupDatabase() {
 }
 
 setupDatabase();
+

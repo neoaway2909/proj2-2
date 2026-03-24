@@ -23,6 +23,8 @@ const io = new Server(server, {
 });
 
 app.set('io', io);
+app.use('/uploads', express.static('uploads')); // เสิร์ฟโฟลเดอร์รูปภาพ
+
 
 // ส่วนการเชื่อมต่อ Socket.io
 io.on('connection', (socket) => {
@@ -72,6 +74,8 @@ import superadminRoutes from './routes/superadmin.js';
 import appointmentRoutes from './routes/appointments.js';
 import chatRoutes from './routes/chat.js';
 import notificationRoutes from './routes/notifications.js';
+import profileRoutes from './routes/profile.js';
+
 
 // ใช้งานเส้นทาง API ต่างๆ
 app.use('/api', authRoutes);
@@ -81,6 +85,8 @@ app.use('/api/notifications', (req, res, next) => { console.log('notif hit'); ne
 app.use('/api', appointmentRoutes);
 app.use('/api', chatRoutes);
 app.use('/api', notificationRoutes);
+app.use('/api', profileRoutes); // ใช้งานเส้นทางโปรไฟล์
+
 
 // ระบบส่งการแจ้งเตือนนัดหมาย (รันทุกๆ 1 ชั่วโมง)
 const checkReminders = async () => {
@@ -88,17 +94,19 @@ const checkReminders = async () => {
         const pool = await poolPromise;
         // ค้นหารายการนัดหมายที่มีกำหนดในอีก 3 วัน หรือ 1 วันข้างหน้า
         const result = await pool.request().query(`
-            SELECT a.*, d.FullName 
+            SELECT a.*, d.FullName, ds.AvailableDate
             FROM Appointments a
-            JOIN Doctors d ON a.DoctorId = d.Id
-            WHERE a.AppointDate IN (
+            JOIN DoctorSchedules ds ON a.ScheduleId = ds.Id
+            JOIN Doctors d ON ds.DoctorId = d.Id
+            WHERE ds.AvailableDate IN (
                 CONVERT(date, DATEADD(day, 3, GETDATE())),
                 CONVERT(date, DATEADD(day, 1, GETDATE()))
             )
         `);
 
         for (const appt of result.recordset) {
-            const daysLeft = Math.ceil((new Date(appt.AppointDate) - new Date()) / (1000 * 60 * 60 * 24));
+            const daysLeft = Math.ceil((new Date(appt.AvailableDate) - new Date()) / (1000 * 60 * 60 * 24));
+
             const msg = `เตือนนัดหมาย: อีก ${daysLeft} วัน คุณมีนัดกับ ${appt.FullName}`;
 
             // ตรวจสอบว่าวันนี้ส่งการแจ้งเตือนเดิมไปรึยัง เพื่อป้องกันการส่งซ้ำซ้อนในวันเดียวกัน
