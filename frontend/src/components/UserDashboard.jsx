@@ -381,27 +381,11 @@ const UserDashboard = () => {
                     <div className={`tab-item ${subTab === 'history' ? 'active' : ''}`} onClick={() => setSubTab('history')}>History</div>
                 </div>
                 <div className="appointments-list">
-<<<<<<< HEAD
-                    {filtered.map(appt => {
-                        const dl = getApptDiff(appt.AppointDate);
-                        const near = dl <= 3 && dl >= 0;
-                        return (
-                            <div key={appt.Id} className={`appointment-card ${subTab === 'history' ? '' : (near ? 'near' : 'far')}`}>
-                                <div className="doctor-avatar"><User size={30} color="#94a3b8" /></div>
-                                <div className="appt-info">
-                                    <h4 className="doc-name">{appt.FullName}</h4>
-                                    <div className="doc-specialty" style={{ fontSize: '0.75rem' }}>{appt.Specialty}</div>
-                                    <div className="appt-date-time"><CalendarIcon size={16} /> {new Date(appt.AppointDate).toLocaleDateString()} <Clock size={16} /> {appt.AppointTime.substring(0, 5)}</div>
-                                </div>
-                                <div className={`appt-badge ${subTab === 'history' ? '' : (near ? 'near' : 'far')}`} style={subTab === 'history' ? { background: '#94a3b8' } : {}}>{dl < 0 ? 'Past' : (dl === 0 ? 'Today' : `${dl} days`)}</div>
-                            </div>
-                        );
-                    })}
-=======
                     {filtered.length === 0 ? (
-                        <div style={{ textAlign: 'center', color: '#94a3b8', padding: '3rem 0' }}>
-                            <p style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>ยังไม่มีรายการนัดหมาย</p>
-                            <p style={{ fontSize: '0.85rem' }}>คุณสามารถกลับไปที่หน้า Home เพื่อทำการจองคิวคุณหมอได้ครับ</p>
+                        <div className="w-full flex flex-col items-center justify-center py-12 bg-white rounded-2xl border border-slate-100 shadow-sm mt-4">
+                            <CalendarIcon size={48} className="text-slate-300 mb-4" strokeWidth={1.5} />
+                            <p className="text-lg font-bold text-slate-700 mb-1">ยังไม่มีรายการนัดหมาย</p>
+                            <p className="text-sm font-medium text-slate-500 text-center px-4">คุณสามารถกลับไปที่หน้า Home เพื่อทำการจองคิวคุณหมอได้ครับ</p>
                         </div>
                     ) : (
                         filtered.map(appt => {
@@ -412,15 +396,14 @@ const UserDashboard = () => {
                                     <div className="doctor-avatar"><User size={30} color="#94a3b8" /></div>
                                     <div className="appt-info">
                                         <h4 className="doc-name">{appt.FullName}</h4>
-                                        <div className="doc-specialty" style={{fontSize:'0.75rem'}}>{appt.Specialty}</div>
+                                        <div className="doc-specialty" style={{ fontSize: '0.75rem' }}>{appt.Specialty}</div>
                                         <div className="appt-date-time"><CalendarIcon size={16} /> {new Date(appt.AppointDate).toLocaleDateString()} <Clock size={16} /> {appt.AppointTime.substring(11, 16)}</div>
                                     </div>
-                                    <div className={`appt-badge ${subTab === 'history' ? '' : (near ? 'near' : 'far')}`} style={subTab==='history'?{background:'#94a3b8'}:{}}>{dl<0?'Past':(dl===0?'Today':`${dl} days`)}</div>
+                                    <div className={`appt-badge ${subTab === 'history' ? '' : (near ? 'near' : 'far')}`} style={subTab === 'history' ? { background: '#94a3b8' } : {}}>{dl < 0 ? 'Past' : (dl === 0 ? 'Today' : `${dl} days`)}</div>
                                 </div>
                             );
                         })
                     )}
->>>>>>> fcb96e2a4f82acf4ef40692cc16358d92d00c587
                 </div>
             </div>
         );
