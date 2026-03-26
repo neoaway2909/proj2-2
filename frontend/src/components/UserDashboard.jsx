@@ -26,6 +26,7 @@ const UserDashboard = () => {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [myAppointments, setMyAppointments] = useState([]);
     const [subTab, setSubTab] = useState('upcoming');
+    const [searchQuery, setSearchQuery] = useState('');
 
     // สถานะสำหรับระบบแชท (เก็บข้อความรายห้อง)
     const [chatMessages, setChatMessages] = useState({}); // { roomId: [msgs] }
@@ -239,6 +240,11 @@ const UserDashboard = () => {
 
     const renderHome = () => {
         if (!selectedDoctor) {
+            const filteredDoctors = doctors.filter(doc => 
+                (doc.FullName || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+                (doc.Specialty || '').toLowerCase().includes(searchQuery.toLowerCase())
+            );
+
             return (
                 <div className="flex flex-col gap-10 w-full max-w-[900px] mx-auto mt-4">
                     {/* Welcome Banner */}
@@ -256,9 +262,10 @@ const UserDashboard = () => {
 
                     {/* Doctors List */}
                     <div className="flex flex-col gap-6 items-center">
-                        {doctors.map(doc => (
-                            <div 
-                                key={doc.Id} 
+                        {filteredDoctors.length > 0 ? (
+                            filteredDoctors.map(doc => (
+                                <div 
+                                    key={doc.Id} 
                                 className="w-full max-w-[780px] bg-white border border-[#e2e8f0] rounded-2xl p-[18px] flex flex-col md:flex-row items-center justify-between shadow-[0_4px_16px_rgba(0,0,0,0.04)] hover:shadow-md transition-all cursor-pointer"
                                 onClick={() => setSelectedDoctor(doc)}
                             >
@@ -300,7 +307,12 @@ const UserDashboard = () => {
                                     </button>
                                 </div>
                             </div>
-                        ))}
+                        ))
+                    ) : (
+                        <div className="w-full flex justify-center py-10 bg-white border border-[#e2e8f0] rounded-2xl shadow-sm text-slate-500 font-medium text-[15px]">
+                            No doctors found matching "{searchQuery}"
+                        </div>
+                    )}
                     </div>
                 </div>
             );
@@ -446,7 +458,13 @@ const UserDashboard = () => {
                 <header className="h-[80px] bg-[#2f66ee] flex items-center justify-between px-8 text-white rounded-bl-[2.5rem] shadow-sm relative z-10 shrink-0">
                     <div className="flex items-center bg-white/10 rounded-full px-5 py-2.5 w-[420px] border border-white/20 shadow-inner">
                         <Search size={18} className="text-white/80" />
-                        <input type="text" placeholder="search for doctor, specialities" className="bg-transparent border-none text-white outline-none w-full ml-3 placeholder-white/60 text-sm font-medium" />
+                        <input 
+                            type="text" 
+                            placeholder="search for doctor, specialities" 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="bg-transparent border-none text-white outline-none w-full ml-3 placeholder-white/60 text-sm font-medium" 
+                        />
                     </div>
                     <div className="flex items-center gap-8">
                         <div className="flex items-center gap-4 font-bold text-sm tracking-wide">
