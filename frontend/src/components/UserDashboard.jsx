@@ -333,21 +333,28 @@ const UserDashboard = () => {
                     <div className={`tab-item ${subTab === 'history' ? 'active' : ''}`} onClick={() => setSubTab('history')}>History</div>
                 </div>
                 <div className="appointments-list">
-                    {filtered.map(appt => {
-                        const dl = getApptDiff(appt.AppointDate);
-                        const near = dl <= 3 && dl >= 0;
-                        return (
-                            <div key={appt.Id} className={`appointment-card ${subTab === 'history' ? '' : (near ? 'near' : 'far')}`}>
-                                <div className="doctor-avatar"><User size={30} color="#94a3b8" /></div>
-                                <div className="appt-info">
-                                    <h4 className="doc-name">{appt.FullName}</h4>
-                                    <div className="doc-specialty" style={{fontSize:'0.75rem'}}>{appt.Specialty}</div>
-                                    <div className="appt-date-time"><CalendarIcon size={16} /> {new Date(appt.AppointDate).toLocaleDateString()} <Clock size={16} /> {appt.AppointTime.substring(0,5)}</div>
+                    {filtered.length === 0 ? (
+                        <div style={{ textAlign: 'center', color: '#94a3b8', padding: '3rem 0' }}>
+                            <p style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>ยังไม่มีรายการนัดหมาย</p>
+                            <p style={{ fontSize: '0.85rem' }}>คุณสามารถกลับไปที่หน้า Home เพื่อทำการจองคิวคุณหมอได้ครับ</p>
+                        </div>
+                    ) : (
+                        filtered.map(appt => {
+                            const dl = getApptDiff(appt.AppointDate);
+                            const near = dl <= 3 && dl >= 0;
+                            return (
+                                <div key={appt.Id} className={`appointment-card ${subTab === 'history' ? '' : (near ? 'near' : 'far')}`}>
+                                    <div className="doctor-avatar"><User size={30} color="#94a3b8" /></div>
+                                    <div className="appt-info">
+                                        <h4 className="doc-name">{appt.FullName}</h4>
+                                        <div className="doc-specialty" style={{fontSize:'0.75rem'}}>{appt.Specialty}</div>
+                                        <div className="appt-date-time"><CalendarIcon size={16} /> {new Date(appt.AppointDate).toLocaleDateString()} <Clock size={16} /> {appt.AppointTime.substring(11, 16)}</div>
+                                    </div>
+                                    <div className={`appt-badge ${subTab === 'history' ? '' : (near ? 'near' : 'far')}`} style={subTab==='history'?{background:'#94a3b8'}:{}}>{dl<0?'Past':(dl===0?'Today':`${dl} days`)}</div>
                                 </div>
-                                <div className={`appt-badge ${subTab === 'history' ? '' : (near ? 'near' : 'far')}`} style={subTab==='history'?{background:'#94a3b8'}:{}}>{dl<0?'Past':(dl===0?'Today':`${dl} days`)}</div>
-                            </div>
-                        );
-                    })}
+                            );
+                        })
+                    )}
                 </div>
             </div>
         );
