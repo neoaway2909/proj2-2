@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './components/Login';
-import Register from './components/Register';
+import Auth from './components/Auth';
 import UserDashboard from './components/UserDashboard';
 import AdminDashboard from './components/AdminDashboard';
 import SuperAdminDashboard from './components/SuperAdminDashboard';
@@ -12,7 +11,7 @@ const PrivateRoute = ({ children, role }) => {
     const userRole = localStorage.getItem('role');
 
     if (!token) return <Navigate to="/login" />;
-    
+
     // If route requires a specific role and user doesn't have it
     if (role && userRole !== role) {
         if (userRole === 'superadmin') return <Navigate to="/superadmin" />;
@@ -20,7 +19,7 @@ const PrivateRoute = ({ children, role }) => {
         if (userRole === 'doctor') return <Navigate to="/doctor" />;
         return <Navigate to="/dashboard" />;
     }
-    
+
     return children;
 };
 
@@ -28,39 +27,39 @@ function App() {
     return (
         <Router>
             <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route 
-                    path="/dashboard" 
+                <Route path="/login" element={<Auth />} />
+                <Route path="/register" element={<Auth />} />
+                <Route
+                    path="/dashboard"
                     element={
                         <PrivateRoute role="user">
                             <UserDashboard />
                         </PrivateRoute>
-                    } 
+                    }
                 />
-                <Route 
-                    path="/admin" 
+                <Route
+                    path="/admin"
                     element={
                         <PrivateRoute role="admin">
                             <AdminDashboard />
                         </PrivateRoute>
-                    } 
+                    }
                 />
-                <Route 
-                    path="/superadmin" 
+                <Route
+                    path="/superadmin"
                     element={
                         <PrivateRoute role="superadmin">
                             <SuperAdminDashboard />
                         </PrivateRoute>
-                    } 
+                    }
                 />
-                <Route 
-                    path="/doctor" 
+                <Route
+                    path="/doctor"
                     element={
                         <PrivateRoute role="doctor">
                             <DoctorDashboard />
                         </PrivateRoute>
-                    } 
+                    }
                 />
                 <Route path="/" element={<Navigate to="/login" />} />
             </Routes>

@@ -2,8 +2,8 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
-import { 
-    Home, Calendar as CalendarIcon, MessageSquare, User, LogOut, 
+import {
+    Home, Calendar as CalendarIcon, MessageSquare, User, LogOut,
     Search, Bell, ArrowLeft, ChevronLeft, ChevronRight, Clock, Send
 } from 'lucide-react';
 import './UserDashboard.css';
@@ -118,10 +118,10 @@ const UserDashboard = () => {
         fetchMyAppointments();
         fetchNotifications();
         fetchUserProfile();
-        
+
         socketRef.current = io(SOCKET_URL);
 
-        
+
         socketRef.current.on('scheduleUpdated', () => {
             fetchSlots();
             fetchMyAppointments();
@@ -196,7 +196,7 @@ const UserDashboard = () => {
     const handleSendMessage = (e) => {
         e.preventDefault();
         if (!inputMsg.trim()) return;
-        
+
         const room = getChatRoomId();
         socketRef.current.emit('send-message', {
             room,
@@ -212,7 +212,7 @@ const UserDashboard = () => {
         const month = currentMonth.getMonth();
         const firstDay = new Date(year, month, 1).getDay();
         const days = new Date(year, month + 1, 0).getDate();
-        
+
         const arr = [];
         for (let i = 0; i < firstDay; i++) arr.push({ day: null });
         for (let i = 1; i <= days; i++) {
@@ -230,9 +230,9 @@ const UserDashboard = () => {
 
     const getApptDiff = (dateStr) => {
         const today = new Date();
-        today.setHours(0,0,0,0);
+        today.setHours(0, 0, 0, 0);
         const apptDate = new Date(dateStr);
-        apptDate.setHours(0,0,0,0);
+        apptDate.setHours(0, 0, 0, 0);
         const diffTime = apptDate - today;
         return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     };
@@ -240,21 +240,69 @@ const UserDashboard = () => {
     const renderHome = () => {
         if (!selectedDoctor) {
             return (
-                <>
-                    <h2 style={{ textAlign: 'left', marginBottom: '2rem' }}>Choose your Doctor</h2>
-                    <div className="doctor-list-grid">
+                <div className="flex flex-col gap-10 w-full max-w-[900px] mx-auto mt-4">
+                    {/* Welcome Banner */}
+                    <div className="bg-[#eef4ff] rounded-[20px] p-8 flex justify-between items-center border border-[#d8e5fe]">
+                        <div>
+                            <h2 className="text-2xl font-extrabold text-[#111827] mb-2 tracking-tight">Welcome back, {username}!</h2>
+                            <p className="text-slate-600 text-sm font-medium">How are you feeling today?</p>
+                        </div>
+                        <div className="hidden md:block">
+                            <div className="w-[120px] h-[120px] bg-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                                <img src="https://images.unsplash.com/photo-1612349317150-e410f624c427?q=80&w=250&h=250&auto=format&fit=crop" alt="Doctor" className="w-full h-full object-cover object-top" />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Doctors List */}
+                    <div className="flex flex-col gap-6 items-center">
                         {doctors.map(doc => (
-                            <div key={doc.Id} className="doctor-item-card" onClick={() => setSelectedDoctor(doc)}>
-                                <div className="doctor-avatar"><User size={40} color="#94a3b8" /></div>
-                                <div>
-                                    <h4 className="doc-name">{doc.FullName}</h4>
-                                    <span className="doc-specialty">{doc.Specialty}</span>
-                                    <p className="hospital-name">Wattanapat Hospital</p>
+                            <div 
+                                key={doc.Id} 
+                                className="w-full max-w-[780px] bg-white border border-[#e2e8f0] rounded-2xl p-[18px] flex flex-col md:flex-row items-center justify-between shadow-[0_4px_16px_rgba(0,0,0,0.04)] hover:shadow-md transition-all cursor-pointer"
+                                onClick={() => setSelectedDoctor(doc)}
+                            >
+                                <div className="flex items-center gap-5 w-full md:w-auto">
+                                    {/* Avatar */}
+                                    <div className="w-16 h-16 bg-[#e6f0ff] rounded-full border border-[#abc8ff] flex items-center justify-center shrink-0">
+                                        <User size={30} strokeWidth={2.5} className="text-[#2f66ee]" fill="currentColor" />
+                                    </div>
+                                    
+                                    {/* Info */}
+                                    <div className="flex flex-col justify-center text-left">
+                                        <h4 className="text-[15px] font-extrabold text-gray-900 mb-1 leading-tight">{doc.FullName}</h4>
+                                        <div className="self-start bg-[#2f66ee] text-white text-[10px] font-bold px-3 py-1 rounded-full mb-3 shadow-sm tracking-wide">
+                                            {doc.Specialty || "General"}
+                                        </div>
+                                        <div className="flex flex-col gap-1.5 text-[11px] text-slate-500 font-bold">
+                                            <div className="flex items-center gap-1.5">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6084e6" strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> 
+                                                <span>{doc.Hospital || "Wattanapat Hospital"}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1.5">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6084e6" strokeWidth="2.5"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                                                <span>{doc.Cases || 0} case</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Right Side */}
+                                <div className="flex flex-col items-center md:items-end justify-center w-full md:w-auto mt-5 md:mt-0">
+                                    <div className="text-right mb-6">
+                                        <div className="text-[#10b981] font-bold text-[13px]">{doc.Price || '800'} Baht</div>
+                                        <div className="text-slate-500 text-[11px] font-bold flex items-center justify-center md:justify-end gap-1 mt-1">
+                                            <Clock size={12} strokeWidth={3} className="text-slate-400" /> {doc.Duration || '30'} minute
+                                        </div>
+                                    </div>
+                                    <button className="bg-[#2f66ee] hover:bg-blue-600 text-white font-bold px-6 py-2 rounded-lg transition-all text-xs w-full md:w-auto shadow-sm tracking-wide">
+                                        Book Now
+                                    </button>
                                 </div>
                             </div>
                         ))}
                     </div>
-                </>
+                </div>
             );
         }
 
@@ -306,10 +354,10 @@ const UserDashboard = () => {
 
     const renderAppointments = () => {
         const today = new Date();
-        today.setHours(0,0,0,0);
+        today.setHours(0, 0, 0, 0);
         const filtered = myAppointments.filter(a => {
             const d = new Date(a.AppointDate);
-            d.setHours(0,0,0,0);
+            d.setHours(0, 0, 0, 0);
             return subTab === 'upcoming' ? d >= today : d < today;
         });
 
@@ -329,10 +377,10 @@ const UserDashboard = () => {
                                 <div className="doctor-avatar"><User size={30} color="#94a3b8" /></div>
                                 <div className="appt-info">
                                     <h4 className="doc-name">{appt.FullName}</h4>
-                                    <div className="doc-specialty" style={{fontSize:'0.75rem'}}>{appt.Specialty}</div>
-                                    <div className="appt-date-time"><CalendarIcon size={16} /> {new Date(appt.AppointDate).toLocaleDateString()} <Clock size={16} /> {appt.AppointTime.substring(0,5)}</div>
+                                    <div className="doc-specialty" style={{ fontSize: '0.75rem' }}>{appt.Specialty}</div>
+                                    <div className="appt-date-time"><CalendarIcon size={16} /> {new Date(appt.AppointDate).toLocaleDateString()} <Clock size={16} /> {appt.AppointTime.substring(0, 5)}</div>
                                 </div>
-                                <div className={`appt-badge ${subTab === 'history' ? '' : (near ? 'near' : 'far')}`} style={subTab==='history'?{background:'#94a3b8'}:{}}>{dl<0?'Past':(dl===0?'Today':`${dl} days`)}</div>
+                                <div className={`appt-badge ${subTab === 'history' ? '' : (near ? 'near' : 'far')}`} style={subTab === 'history' ? { background: '#94a3b8' } : {}}>{dl < 0 ? 'Past' : (dl === 0 ? 'Today' : `${dl} days`)}</div>
                             </div>
                         );
                     })}
@@ -378,38 +426,54 @@ const UserDashboard = () => {
     };
 
     return (
-        <div className="user-layout">
-            <aside className="sidebar">
-                <div className="sidebar-logo"><div style={{ background: '#5b89de', padding: '8px', borderRadius: '12px' }}><Home color="white" size={24} /></div><span style={{ fontWeight: 800, color: '#2d6cd1' }}>CareOnline</span></div>
-                <nav className="sidebar-menu">
-                    <div className={`menu-item ${activeView === 'home' ? 'active' : ''}`} onClick={() => setActiveView('home')}><Home size={20} /> Home</div>
-                    <div className={`menu-item ${activeView === 'appointments' ? 'active' : ''}`} onClick={() => setActiveView('appointments')}><CalendarIcon size={20} /> Appointment</div>
-                    <div className={`menu-item ${activeView === 'chat' ? 'active' : ''}`} onClick={() => setActiveView('chat')}><MessageSquare size={20} /> Chat</div>
-                    <div className={`menu-item ${activeView === 'profile' ? 'active' : ''}`} onClick={() => setActiveView('profile')}><User size={20} /> Profile</div>
-                    <div className="menu-item logout-item" onClick={handleLogout} style={{ marginTop: 'auto' }}><LogOut size={20} /> Logout</div>
+        <div className="flex min-h-screen bg-[#f8fafc] font-sans">
+            <aside className="fixed left-0 top-0 h-full w-[260px] bg-white border-r border-slate-100 flex flex-col z-20 shadow-sm">
+                <div className="h-[80px] flex items-center px-8 border-b border-transparent shrink-0">
+                    <div className="bg-[#2f66ee] p-2 rounded-xl mr-3 shadow-sm shadow-[#2f66ee]/30"><Home color="white" size={20} /></div>
+                    <span className="font-extrabold text-[#2f66ee] text-lg tracking-tight">CareOnline</span>
+                </div>
+                <nav className="flex-1 flex flex-col gap-1.5 px-4 py-6">
+                    <div className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl cursor-pointer font-bold transition-all ${activeView === 'home' ? 'bg-[#2f66ee] text-white shadow-md shadow-[#2f66ee]/20 translate-x-1' : 'text-slate-500 hover:bg-slate-50 hover:text-[#2f66ee]'}`} onClick={() => setActiveView('home')}><Home size={22} className={activeView === 'home' ? 'text-white' : 'text-slate-800'} /> Home</div>
+                    <div className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl cursor-pointer font-bold transition-all ${activeView === 'appointments' ? 'bg-[#2f66ee] text-white shadow-md shadow-[#2f66ee]/20 translate-x-1' : 'text-slate-500 hover:bg-slate-50 hover:text-[#2f66ee]'}`} onClick={() => setActiveView('appointments')}><CalendarIcon size={22} className={activeView === 'appointments' ? 'text-white' : 'text-slate-800'} /> Appointment</div>
+                    <div className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl cursor-pointer font-bold transition-all ${activeView === 'chat' ? 'bg-[#2f66ee] text-white shadow-md shadow-[#2f66ee]/20 translate-x-1' : 'text-slate-500 hover:bg-slate-50 hover:text-[#2f66ee]'}`} onClick={() => setActiveView('chat')}><MessageSquare size={22} className={activeView === 'chat' ? 'text-white' : 'text-slate-800'} /> Chat</div>
+                    <div className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl cursor-pointer font-bold transition-all ${activeView === 'profile' ? 'bg-[#2f66ee] text-white shadow-md shadow-[#2f66ee]/20 translate-x-1' : 'text-slate-500 hover:bg-slate-50 hover:text-[#2f66ee]'}`} onClick={() => setActiveView('profile')}><User size={22} className={activeView === 'profile' ? 'text-white' : 'text-slate-800'} /> Profile</div>
 
+                    <div className="mt-auto flex items-center gap-4 px-4 py-3.5 rounded-2xl cursor-pointer font-bold text-red-500 hover:bg-red-50 transition-colors" onClick={handleLogout}><LogOut size={22} /> Logout</div>
                 </nav>
             </aside>
-            <main className="main-wrapper">
-                <header className="top-header">
-                    <div className="search-box"><Search size={18} opacity={0.7} /><input type="text" placeholder="search..." /></div>
-                    <div className="header-right">
-                        <div className="notification-bell-wrapper" onClick={() => { setShowNotifications(!showNotifications); markNotificationsRead(); }}>
-                            <Bell size={20} />
+
+            <main className="ml-[260px] flex-1 flex flex-col min-h-screen">
+                <header className="h-[80px] bg-[#2f66ee] flex items-center justify-between px-8 text-white rounded-bl-[2.5rem] shadow-sm relative z-10 shrink-0">
+                    <div className="flex items-center bg-white/10 rounded-full px-5 py-2.5 w-[420px] border border-white/20 shadow-inner">
+                        <Search size={18} className="text-white/80" />
+                        <input type="text" placeholder="search for doctor, specialities" className="bg-transparent border-none text-white outline-none w-full ml-3 placeholder-white/60 text-sm font-medium" />
+                    </div>
+                    <div className="flex items-center gap-8">
+                        <div className="flex items-center gap-4 font-bold text-sm tracking-wide">
+                            <span className="text-white cursor-pointer hover:opacity-80 transition-opacity">TH</span>
+                            <span className="text-blue-200 cursor-pointer hover:opacity-100 transition-opacity">EN</span>
+                        </div>
+
+                        <div className="relative cursor-pointer hover:opacity-80 transition-opacity" onClick={() => { setShowNotifications(!showNotifications); markNotificationsRead(); }}>
+                            <Bell size={22} fill="currentColor" className="text-white" />
                             {notifications.filter(n => !n.IsRead).length > 0 && (
-                                <span className="notification-badge">{notifications.filter(n => !n.IsRead).length}</span>
+                                <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1 shadow-sm">
+                                    {notifications.filter(n => !n.IsRead).length}
+                                </span>
                             )}
                             {showNotifications && (
-                                <div className="notifications-dropdown" onClick={(e) => e.stopPropagation()}>
-                                    <div className="dropdown-header">การแจ้งเตือน</div>
-                                    <div className="dropdown-body">
+                                <div className="absolute top-[150%] right-0 w-[320px] bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden text-slate-800 z-50">
+                                    <div className="px-5 py-4 border-b border-slate-100 font-extrabold text-base flex justify-between items-center bg-slate-50/50">
+                                        Notifications
+                                    </div>
+                                    <div className="max-h-[350px] overflow-y-auto">
                                         {notifications.length === 0 ? (
-                                            <div className="no-notifications">ไม่มีการแจ้งเตือน</div>
+                                            <div className="py-8 text-center text-slate-400 font-medium text-sm">No new notifications</div>
                                         ) : (
                                             notifications.map(n => (
-                                                <div key={n.Id} className={`notification-item ${!n.IsRead ? 'unread' : ''}`}>
-                                                    <p>{n.Message}</p>
-                                                    <span>{new Date(n.CreatedAt).toLocaleString()}</span>
+                                                <div key={n.Id} className={`p-4 border-b border-slate-50 transition-colors hover:bg-slate-50 ${!n.IsRead ? 'bg-[#f0f5ff]' : ''}`}>
+                                                    <p className="text-sm font-medium text-slate-700 leading-snug">{n.Message}</p>
+                                                    <span className="text-xs text-slate-400 mt-2 block font-medium">{new Date(n.CreatedAt).toLocaleString()}</span>
                                                 </div>
                                             ))
                                         )}
@@ -417,29 +481,24 @@ const UserDashboard = () => {
                                 </div>
                             )}
                         </div>
-                        <div className="user-profile-header" onClick={() => setActiveView('profile')} style={{ cursor: 'pointer' }}>
-                            <div>
-                                <div className="name">{profileData?.FullName || username}</div>
-                                <div className="id">ID: #{profileData?.Id}</div>
+
+                        <div className="flex items-center gap-3.5 cursor-pointer hover:bg-white/5 p-1.5 rounded-full pr-4 transition-colors" onClick={() => setActiveView('profile')}>
+                            <div className="w-11 h-11 rounded-full bg-white flex items-center justify-center overflow-hidden border-2 border-white/20 text-[#2f66ee] shadow-sm">
+                                {profileData?.ProfilePic ? <img src={`${UPLOAD_URL}${profileData.ProfilePic}`} alt="avatar" className="w-full h-full object-cover" /> : <User size={26} fill="currentColor" />}
                             </div>
-                            <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px solid #fff' }}>
-                                {profileData?.ProfilePic ? (
-                                    <img src={`${UPLOAD_URL}${profileData.ProfilePic}`} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                ) : (
-                                    <User color="#5b89de" size={24} />
-                                )}
+                            <div className="text-left hidden sm:block">
+                                <div className="text-sm font-extrabold tracking-tight">{profileData?.FullName || username}</div>
+                                <div className="text-xs text-blue-100 font-bold tracking-wide">ID: {profileData?.Id || 'card number'}</div>
                             </div>
                         </div>
-
                     </div>
                 </header>
-                <div className="content-area">
-                    {activeView === 'home' ? renderHome() : 
-                     activeView === 'appointments' ? renderAppointments() : 
-                     activeView === 'chat' ? renderChat() :
-                     <Profile onBack={() => { setActiveView('home'); fetchUserProfile(); }} />}
+                <div className="flex-1 p-8 md:p-10 w-full overflow-y-auto bg-transparent">
+                    {activeView === 'home' && renderHome()}
+                    {activeView === 'appointments' && renderAppointments()}
+                    {activeView === 'chat' && renderChat()}
+                    {activeView === 'profile' && <Profile onBack={() => { setActiveView('home'); fetchUserProfile(); }} />}
                 </div>
-
             </main>
         </div>
     );
