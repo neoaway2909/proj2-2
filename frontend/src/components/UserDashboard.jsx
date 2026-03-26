@@ -26,6 +26,7 @@ const UserDashboard = () => {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [myAppointments, setMyAppointments] = useState([]);
     const [subTab, setSubTab] = useState('upcoming');
+    const [searchQuery, setSearchQuery] = useState('');
 
     // สถานะสำหรับระบบแชท (เก็บข้อความรายห้อง)
     const [chatMessages, setChatMessages] = useState({}); // { roomId: [msgs] }
@@ -239,20 +240,31 @@ const UserDashboard = () => {
 
     const renderHome = () => {
         if (!selectedDoctor) {
+            const filteredDoctors = doctors.filter(doc => 
+                (doc.FullName || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+                (doc.Specialty || '').toLowerCase().includes(searchQuery.toLowerCase())
+            );
+
             return (
                 <>
                     <h2 style={{ textAlign: 'left', marginBottom: '2rem' }}>Choose your Doctor</h2>
                     <div className="doctor-list-grid">
-                        {doctors.map(doc => (
-                            <div key={doc.Id} className="doctor-item-card" onClick={() => setSelectedDoctor(doc)}>
-                                <div className="doctor-avatar"><User size={40} color="#94a3b8" /></div>
-                                <div>
-                                    <h4 className="doc-name">{doc.FullName}</h4>
-                                    <span className="doc-specialty">{doc.Specialty}</span>
-                                    <p className="hospital-name">Wattanapat Hospital</p>
+                        {filteredDoctors.length > 0 ? (
+                            filteredDoctors.map(doc => (
+                                <div key={doc.Id} className="doctor-item-card" onClick={() => setSelectedDoctor(doc)}>
+                                    <div className="doctor-avatar"><User size={40} color="#94a3b8" /></div>
+                                    <div>
+                                        <h4 className="doc-name">{doc.FullName}</h4>
+                                        <span className="doc-specialty">{doc.Specialty}</span>
+                                        <p className="hospital-name">Wattanapat Hospital</p>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))
+                        ) : (
+                            <p style={{ color: '#64748b', gridColumn: '1 / -1', textAlign: 'center' }}>
+                                No doctors found matching "{searchQuery}"
+                            </p>
+                        )}
                     </div>
                 </>
             );
@@ -392,7 +404,15 @@ const UserDashboard = () => {
             </aside>
             <main className="main-wrapper">
                 <header className="top-header">
-                    <div className="search-box"><Search size={18} opacity={0.7} /><input type="text" placeholder="search..." /></div>
+                    <div className="search-box">
+                        <Search size={18} opacity={0.7} />
+                        <input 
+                            type="text" 
+                            placeholder="search doctors..." 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
                     <div className="header-right">
                         <div className="notification-bell-wrapper" onClick={() => { setShowNotifications(!showNotifications); markNotificationsRead(); }}>
                             <Bell size={20} />

@@ -33,5 +33,54 @@ router.get('/admin-only', authenticateToken, (req, res) => {
     }
     res.json({ message: 'Welcome to Admin Dashboard' });
 });
+// แก้ไขข้อมูลแพทย์
+router.put('/update-doctor/:id', authenticateToken, async (req, res) => {
+    const { id } = req.params;
+    const { fullName, specialty, phoneNumber } = req.body;
+
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Admin access required' });
+    }
+
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('id', sql.Int, id)
+            .input('fullName', sql.NVARCHAR, fullName)
+            .input('specialty', sql.NVARCHAR, specialty)
+            .input('phoneNumber', sql.NVARCHAR, phoneNumber)
+            .query('UPDATE Doctors SET FullName = @fullName, Specialty = @specialty, PhoneNumber = @phoneNumber WHERE Id = @id');
+
+        if (result.rowsAffected[0] === 0) {
+            return res.status(404).json({ message: 'Doctor not found' });
+        }
+        res.json({ message: 'Doctor updated successfully' });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// ลบข้อมูลแพทย์
+router.delete('/delete-doctor/:id', authenticateToken, async (req, res) => {
+    const { id } = req.params;
+
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Admin access required' });
+    }
+
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('id', sql.Int, id)
+            .query('DELETE FROM Doctors WHERE Id = @id');
+
+        if (result.rowsAffected[0] === 0) {
+            return res.status(404).json({ message: 'Doctor not found' });
+        }
+        res.json({ message: 'Doctor deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
 
 export default router;

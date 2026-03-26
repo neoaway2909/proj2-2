@@ -21,6 +21,7 @@ const AdminDashboard = () => {
     const [fullName, setFullName] = useState('');
     const [specialty, setSpecialty] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
+    const [editingDoctorId, setEditingDoctorId] = useState(null);
     
     // สถานะสำหรับการจัดการตารางเวลาของแพทย์
     const [doctors, setDoctors] = useState([]);
@@ -122,14 +123,47 @@ const AdminDashboard = () => {
         e.preventDefault();
         try {
             const config = { headers: { Authorization: `Bearer ${token}` } };
-            await axios.post(`${API_BASE_URL}/add-doctor`, {
-                fullName, specialty, phoneNumber
-            }, config);
-            alert("บันทึกข้อมูลหมอสำเร็จ");
+            
+            if (editingDoctorId) {
+                // อัปเดตข้อมูลหมอ
+                await axios.put(`${API_BASE_URL}/update-doctor/${editingDoctorId}`, {
+                    fullName, specialty, phoneNumber
+                }, config);
+                alert("แก้ไขข้อมูลหมอสำเร็จ");
+                setEditingDoctorId(null);
+            } else {
+                // เพิ่มข้อมูลหมอใหม่
+                await axios.post(`${API_BASE_URL}/add-doctor`, {
+                    fullName, specialty, phoneNumber
+                }, config);
+                alert("บันทึกข้อมูลหมอสำเร็จ");
+            }
+            
             setFullName(''); setSpecialty(''); setPhoneNumber('');
             fetchAllData();
         } catch (err) {
-            alert(err.response?.data?.message || 'Failed to add doctor');
+            alert(err.response?.data?.message || 'Action failed');
+        }
+    };
+
+    const handleEditDoctor = (doc) => {
+        setEditingDoctorId(doc.Id);
+        setFullName(doc.FullName);
+        setSpecialty(doc.Specialty);
+        setPhoneNumber(doc.PhoneNumber);
+        window.scrollTo(0, 0);
+    };
+
+    const handleDeleteDoctor = async (id) => {
+        if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการลบหมอท่านนี้? (คำเตือน: หากหมอมีการนัดหมายจะลบไม่ได้)')) return;
+        try {
+            const config = { headers: { Authorization: `Bearer ${token}` } };
+            await axios.delete(`${API_BASE_URL}/delete-doctor/${id}`, config);
+            alert("ลบข้อมูลหมอสำเร็จ");
+            fetchAllData();
+        } catch (err) {
+            // บางกรณีฐานข้อมูลอาจเกิด Foreign Key constraint fail ถ้าหมอมีนัดหมายแล้ว
+            alert(err.response?.data?.message || 'ไม่สามารถลบคุณหมอได้ อาจเพราะมีการนัดหมายในระบบแล้ว');
         }
     };
 
@@ -314,9 +348,12 @@ const AdminDashboard = () => {
                         </div>
                     </div>
                 ) : activeTab === 'doctors' ? (
-                    <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-                        <div style={{ background: 'white', padding: '2rem', borderRadius: '20px', border: '1px solid #e2e8f0' }}>
-                            <h2 style={{ color: '#1e293b', textAlign: 'left', marginBottom: '1.5rem', background: 'none', WebkitTextFillColor: 'initial' }}>ลงทะเบียนคุณหมอใหม่</h2>
+                    <div className="doctors-management-container" style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 400px) 1fr', gap: '2rem', alignItems: 'start', paddingBottom: '2rem' }}>
+                        {/* ฟอร์มเพิ่ม/แก้ไขหมอ */}
+                        <div style={{ background: 'white', padding: '2rem', borderRadius: '20px', border: '1px solid #e2e8f0', position: 'sticky', top: '2rem' }}>
+                            <h2 style={{ color: '#1e293b', textAlign: 'left', marginBottom: '1.5rem', background: 'none', WebkitTextFillColor: 'initial' }}>
+                                {editingDoctorId ? 'แก้ไขข้อมูลคุณหมอ' : 'ลงทะเบียนคุณหมอใหม่'}
+                            </h2>
                             <form onSubmit={handleAddDoctor}>
                                 <div className="form-field">
                                     <label>ชื่อ-นามสกุล</label>
@@ -330,8 +367,42 @@ const AdminDashboard = () => {
                                     <label>เบอร์โทรศัพท์ติดต่อ</label>
                                     <input type="text" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} required placeholder="08x-xxx-xxxx" />
                                 </div>
-                                <button type="submit" className="save-schedule-btn" style={{ background: '#3b82f6' }}>บันทึกข้อมูล</button>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <button type="submit" className="save-schedule-btn" style={{ background: '#3b82f6', flex: 1, padding: '12px' }}>
+                                        {editingDoctorId ? 'บันทึกการแก้ไข' : 'บันทึกข้อมูล'}
+                                    </button>
+                                    {editingDoctorId && (
+                                        <button type="button" className="save-schedule-btn" style={{ background: '#94a3b8', width: 'auto', padding: '12px 20px' }} onClick={() => {
+                                            setEditingDoctorId(null); setFullName(''); setSpecialty(''); setPhoneNumber('');
+                                        }}>ยกเลิก</button>
+                                    )}
+                                </div>
                             </form>
+                        </div>
+
+                        {/* รายชื่อหมอ */}
+                        <div style={{ background: 'white', padding: '2rem', borderRadius: '20px', border: '1px solid #e2e8f0' }}>
+                            <h2 style={{ color: '#1e293b', textAlign: 'left', marginBottom: '1.5rem', background: 'none', WebkitTextFillColor: 'initial' }}>รายชื่อคุณหมอ ({doctors.length})</h2>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                {doctors.map(doc => (
+                                    <div key={doc.Id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', border: '1px solid #e2e8f0', borderRadius: '12px', background: editingDoctorId === doc.Id ? '#f8fafc' : 'white' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                            <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <User size={20} color="#94a3b8" />
+                                            </div>
+                                            <div>
+                                                <div style={{ fontWeight: 700, color: '#1e293b' }}>{doc.FullName}</div>
+                                                <div style={{ fontSize: '0.875rem', color: '#64748b' }}>{doc.Specialty} | {doc.PhoneNumber}</div>
+                                            </div>
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            <button onClick={() => handleEditDoctor(doc)} style={{ padding: '6px 12px', borderRadius: '8px', border: 'none', background: '#e0f2fe', color: '#0369a1', cursor: 'pointer', fontWeight: 600 }}>แก้ไข</button>
+                                            <button onClick={() => handleDeleteDoctor(doc.Id)} style={{ padding: '6px 12px', borderRadius: '8px', border: 'none', background: '#fee2e2', color: '#b91c1c', cursor: 'pointer', fontWeight: 600 }}>ลบ</button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {doctors.length === 0 && <p style={{ color: '#94a3b8', textAlign: 'center', padding: '2rem 0' }}>ยังไม่มีข้อมูลคุณหมอ</p>}
+                            </div>
                         </div>
                     </div>
                 ) : renderChat()}
