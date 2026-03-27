@@ -1,0 +1,316 @@
+openapi: 3.0.0
+info:
+  title: Medical Appointment System API
+  version: 1.0.0
+  description: API Documentation for the CareOnline Medical Appointment System
+servers:
+  - url: http://localhost:5001/api
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Auth
+    description: Authentication operations
+  - name: Appointments
+    description: Medical Appointment operations
+  - name: Admin
+    description: Admin Management operations
+  - name: Profile
+    description: User Profile operations
+  - name: SuperAdmin
+    description: Super Admin operations
+  - name: Notifications
+    description: User Notifications
+  - name: Chat
+    description: Chat system operations
+
+paths:
+  # -----------------------------------------------
+  # [หมวด Auth] จัดการเรื่องสิทธิ์และการล๊อกอิน
+  # -----------------------------------------------
+  /login:
+    post:
+      tags: [Auth]
+      # ยิงไปเพื่อเช็ค Username/Password แล้วขอรับ Token
+      summary: Login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Successful login
+          
+  /register:
+    post:
+      tags: [Auth]
+      # ยิงข้อมูลไปพื่อสมัครเป็นสมาชิกระดับ User
+      summary: Register a new user
+      security: [] 
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '201':
+          description: User registered successfully
+
+  /me:
+    get:
+      tags: [Auth]
+      # ยิงพร้อมแนบ Token ไปเพื่อขอข้อมูลจำเพาะเบื้องต้นของบัญชีที่ถือ Token อยู่
+      summary: Get my Info
+      responses:
+        '200':
+          description: Success
+
+  # -----------------------------------------------
+  # [หมวด Appointments] ระบบการนัดหมายแพทย์
+  # -----------------------------------------------
+  /doctors:
+    get:
+      tags: [Appointments]
+      # ดึงรายชื่อหมอทั้งหมดมาโชว์ที่หน้าบ้าน (อาจจะพร้อมข้อมูลราคาหรือโรงพยาบาล)
+      summary: Get all doctors
+      responses:
+        '200':
+          description: Success
+
+  /doctor-slots:
+    get:
+      tags: [Appointments]
+      # ดึงข้อมูลสล็อตเวลาที่หมอแต่ละคน "ว่าง" ใน "วันที่เลือก" มานำเสนอให้คนไข้กด
+      summary: Get available slots
+      parameters: 
+        - in: query 
+          name: doctorId
+          required: true 
+          schema:
+            type: integer 
+        - in: query 
+          name: date
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Success
+
+  /book:
+    post:
+      tags: [Appointments]
+      # คนไข้กดยืนยันการจองคิว ก็จะส่งข้อมูล หมอ, วันที่ และเวลา มารอลง Database
+      summary: Book an appointment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                doctorId:
+                  type: integer
+                date:
+                  type: string
+                time:
+                  type: string
+      responses:
+        '200':
+          description: Appointment booked successfully
+          
+  /my-appointments:
+    get:
+      tags: [Appointments]
+      # ยิงมารับประวัติการจองและใบนัดทั้งหมด "ของคนล็อกอินปัจจุบันเท่านั้น"
+      summary: Get my appointments
+      responses:
+        '200':
+          description: A list of appointments
+
+  # -----------------------------------------------
+  # [หมวด Admin] อำนาจของแอดมินในการจัดการคิวและแพทย์
+  # -----------------------------------------------
+  /add-doctor:
+    post:
+      tags: [Admin]
+      # ให้แอดมินสามารถเพิ่มข้อมูลประวัติคุณหมอคนใหม่เข้ามาในระบบได้
+      summary: Add a new doctor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                specialty:
+                  type: string
+                phoneNumber:
+                  type: string
+      responses:
+        '201':
+          description: Doctor created successfully
+
+  /update-doctor/{id}: 
+    put:
+      tags: [Admin]
+      # อัปเดตข้อมูลแพทย์เก่า โดยอ้างอิงรหัสไอดีแพทย์ (ID) ที่ต่อมาด้านหลัง Path
+      summary: Update doctor info
+      parameters: 
+        - in: path 
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                specialty:
+                  type: string
+                phoneNumber:
+                  type: string
+      responses:
+        '200':
+          description: Successfully updated
+
+  /delete-doctor/{id}:
+    delete:
+      tags: [Admin]
+      # ลบหมอออกจากทะเบียนแบบถาวร โดยห้ามลบคนที่ยังติคคิวอยู่
+      summary: Delete a doctor
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successfully deleted
+
+  /unavailable:
+    post:
+      tags: [Admin]
+      # แอดมินบังคับล๊อก/บล็อกเวลาที่เกิดเหตุฉุกเฉินหรือหมอลางาน ทำให้คนไข้จองสล็อตนี้ไม่ได้
+      summary: Set doctor unavailable slot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                doctorId:
+                  type: integer
+                date:
+                  type: string
+                startTime:
+                  type: string
+                endTime:
+                  type: string
+      responses:
+        '201':
+          description: Unavailable time saved
+
+  # -----------------------------------------------
+  # [หมวด Profile] ข้อมูลโปรไฟล์หน้าส่วนตัว
+  # -----------------------------------------------
+  /profile:
+    get:
+      tags: [Profile]
+      # ขอข้อมูลต่างๆ ของฉันแบบเต็มๆ เช่น รูป, การตั้งค่า, ชื่อจริง เพื่อเอาไปขึ้นหน้า Profile (หน้า UserDashboard)
+      summary: Fetch Profile
+      responses:
+        '200':
+          description: Success
+
+  # -----------------------------------------------
+  # [หมวด SuperAdmin] สิทธิ์ขั้นสูงสุดของผู้ดูแลระบบแม่
+  # -----------------------------------------------
+  /superadmin/users:
+    get:
+      tags: [SuperAdmin]
+      # เป็นแดชบอร์ดซุปเปอร์แอดมิน เพื่อแสดงฐานข้อมูลประชากรทั้งหมดแยกตามระดับตำแหน่ง และสคริปต์แก้ไข/จัดการ
+      summary: Get all system users
+      responses:
+        '200':
+          description: Success
+
+  # -----------------------------------------------
+  # [หมวด Notifications] ระบบเตือนสติการจอง
+  # -----------------------------------------------
+  /notifications:
+    get:
+      tags: [Notifications]
+      # ดึงข้อความแจ้งเตือนต่างๆ เช่น เตือนใกล้วันนัด หรือเตือนเมื่อจองสำเร็จ
+      summary: Get user notifications
+      responses:
+        '200':
+          description: Success
+          
+  /notifications/read:
+    post:
+      tags: [Notifications]
+      # เมื่อผู้ใช้เปิดดูกระดิ่งแจ้งเตือน ให้ยินมาตรงนี้เพื่อสแตมป์ว่า "อ่านแล้ว" จะได้ไม่ค้างตัวเลขแจ้งกวนใจ
+      summary: Mark notifications as read
+      responses:
+        '200':
+          description: Success
+
+  # -----------------------------------------------
+  # [หมวด Chat] ระบบพูดคุยระหว่างแอดมินและผู้ใช้งาน
+  # -----------------------------------------------
+  /messages/{room}:
+    get:
+      tags: [Chat]
+      # ดึงประวัติการแชทรายห้องส่วนตัวออกมาจากฐานข้อมูล เพื่อนำมาแสดงในแอพ
+      summary: Get chat messages by room
+      parameters:
+        - in: path
+          name: room
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          
+  /chat-users:
+    get:
+      tags: [Chat]
+      # ดึงรายชื่อผู้ใช้ทั้งหมดที่เคยคุยกับ Admin (ใช้ดึงรายชื่อมาเรียงคิวให้ Admin เลือกตอบ)
+      summary: Get list of users who chatted with admin
+      responses:
+        '200':
+          description: Success

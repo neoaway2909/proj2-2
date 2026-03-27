@@ -3,6 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
 
 import { poolPromise, sql } from './db.js';
 
@@ -87,6 +89,9 @@ app.use('/api', chatRoutes);
 app.use('/api', notificationRoutes);
 app.use('/api', profileRoutes); // ใช้งานเส้นทางโปรไฟล์
 
+// เปิดให้เข้าถึง Swagger API Docs
+const swaggerDocument = YAML.load('./swagger.yaml');
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // ระบบส่งการแจ้งเตือนนัดหมาย (รันทุกๆ 1 ชั่วโมง)
 const checkReminders = async () => {
