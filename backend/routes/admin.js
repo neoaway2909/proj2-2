@@ -85,4 +85,37 @@ router.delete('/delete-doctor/:id', authenticateToken, async (req, res) => {
     }
 });
 
+// ดึงรายการนัดหมายทั้งหมด (เฉพาะ Admin)
+router.get('/all-appointments', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Admin access required' });
+    }
+
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .query(`
+                SELECT 
+                    a.Id, 
+                    a.AppointDate, 
+                    a.AppointTime, 
+                    a.Status, 
+                    a.CreatedAt,
+                    u.FullName as CustomerName,
+                    u.Email as CustomerEmail,
+                    u.PhoneNumber as CustomerPhone,
+                    d.FullName as DoctorName,
+                    d.Specialty as DoctorSpecialty
+                FROM Appointments a
+                JOIN Users u ON a.UserId = u.Id
+                JOIN Doctors d ON a.DoctorId = d.Id
+                ORDER BY a.AppointDate DESC, a.AppointTime DESC
+            `);
+
+        res.json(result.recordset);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 export default router;

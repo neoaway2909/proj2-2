@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { 
     LayoutDashboard, Users, Calendar as CalendarIcon, Settings, LogOut,
-    ChevronLeft, ChevronRight, UserPlus, MessageSquare, Send, User
+    ChevronLeft, ChevronRight, UserPlus, MessageSquare, Send, User, ClipboardList
 } from 'lucide-react';
 import './AdminDashboard.css';
 import { API_BASE_URL, SOCKET_URL } from '../config';
@@ -32,6 +32,7 @@ const AdminDashboard = () => {
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
     const [currentMonth, setCurrentMonth] = useState(new Date());
+    const [allAppointments, setAllAppointments] = useState([]);
 
     // สถานะสำหรับระบบแชทกับลูกค้า
     const [chatMessages, setChatMessages] = useState({}); // { room: [msgs] }
@@ -66,6 +67,12 @@ const AdminDashboard = () => {
                 const dots = await axios.get(`${API_BASE_URL}/blocked-dates?doctorId=${doctorId}`);
                 setBlockedDates(dots.data.map(d => new Date(d).toISOString().split('T')[0]));
             }
+            
+            // Fetch all appointments for the new tab
+            const config = { headers: { Authorization: `Bearer ${token}` } };
+            const appts = await axios.get(`${API_BASE_URL}/all-appointments`, config);
+            setAllAppointments(appts.data);
+
             fetchInitialChatUsers();
         } catch (err) {
             console.error("Fetch failed", err);
@@ -292,6 +299,9 @@ const AdminDashboard = () => {
                     <div className={`menu-item ${activeTab === 'schedule' ? 'active' : ''}`} onClick={() => setActiveTab('schedule')}>
                         <CalendarIcon size={20} /> จัดการตารางเวลา
                     </div>
+                    <div className={`menu-item ${activeTab === 'appointments' ? 'active' : ''}`} onClick={() => setActiveTab('appointments')}>
+                        <ClipboardList size={20} /> รายการนัดของลูกค้า
+                    </div>
                     <div className={`menu-item ${activeTab === 'doctors' ? 'active' : ''}`} onClick={() => setActiveTab('doctors')}>
                         <UserPlus size={20} /> เพิ่มข้อมูลหมอ
                     </div>
@@ -410,6 +420,76 @@ const AdminDashboard = () => {
                                 ))}
                                 {doctors.length === 0 && <p style={{ color: '#94a3b8', textAlign: 'center', padding: '2rem 0' }}>ยังไม่มีข้อมูลคุณหมอ</p>}
                             </div>
+                        </div>
+                    </div>
+                ) : activeTab === 'appointments' ? (
+                    <div className="appointments-list-container" style={{ padding: '2rem', background: 'white', borderRadius: '20px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h2 style={{ color: '#1e293b', textAlign: 'left', background: 'none', WebkitTextFillColor: 'initial', margin: 0 }}>
+                                รายการนัดหมายลูกค้าทั้งหมด
+                            </h2>
+                            <div style={{ background: '#eff6ff', color: '#3b82f6', padding: '8px 16px', borderRadius: '12px', fontWeight: 600, fontSize: '0.875rem' }}>
+                                ทั้งหมด {allAppointments.length} รายการ
+                            </div>
+                        </div>
+
+                        <div style={{ overflowX: 'auto' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
+                                <thead>
+                                    <tr style={{ borderBottom: '2px solid #f1f5f9', textAlign: 'left' }}>
+                                        <th style={{ padding: '1rem', color: '#64748b', fontSize: '0.875rem', fontWeight: 600 }}>ข้อมูลลูกค้า</th>
+                                        <th style={{ padding: '1rem', color: '#64748b', fontSize: '0.875rem', fontWeight: 600 }}>นัดพบแพทย์</th>
+                                        <th style={{ padding: '1rem', color: '#64748b', fontSize: '0.875rem', fontWeight: 600 }}>วันเวลาที่นัด</th>
+                                        <th style={{ padding: '1rem', color: '#64748b', fontSize: '0.875rem', fontWeight: 600 }}>สถานะ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {allAppointments.map((appt) => (
+                                        <tr key={appt.Id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                            <td style={{ padding: '1.25rem 1rem' }}>
+                                                <div style={{ fontWeight: 700, color: '#1e293b' }}>{appt.CustomerName}</div>
+                                                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{appt.CustomerEmail}</div>
+                                                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{appt.CustomerPhone}</div>
+                                            </td>
+                                            <td style={{ padding: '1.25rem 1rem' }}>
+                                                <div style={{ fontWeight: 600, color: '#334155' }}>{appt.DoctorName}</div>
+                                                <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{appt.DoctorSpecialty}</div>
+                                            </td>
+                                            <td style={{ padding: '1.25rem 1rem' }}>
+                                                <div style={{ fontWeight: 600, color: '#1e293b' }}>
+                                                    {new Date(appt.AppointDate).toLocaleDateString('th-TH', { 
+                                                        year: 'numeric', 
+                                                        month: 'long', 
+                                                        day: 'numeric' 
+                                                    })}
+                                                </div>
+                                                <div style={{ fontSize: '0.875rem', color: '#64748b' }}>
+                                                    เวลา {appt.AppointTime.substring(0, 5)} น.
+                                                </div>
+                                            </td>
+                                            <td style={{ padding: '1.25rem 1rem' }}>
+                                                <span style={{ 
+                                                    padding: '4px 12px', 
+                                                    borderRadius: '20px', 
+                                                    fontSize: '0.75rem', 
+                                                    fontWeight: 600,
+                                                    background: appt.Status === 'Booked' ? '#dcfce7' : '#f1f5f9',
+                                                    color: appt.Status === 'Booked' ? '#15803d' : '#475569'
+                                                }}>
+                                                    {appt.Status === 'Booked' ? 'ยืนยันแล้ว' : appt.Status}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {allAppointments.length === 0 && (
+                                        <tr>
+                                            <td colSpan="4" style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8' }}>
+                                                ยังไม่มีรายการนัดหมายในระบบ
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 ) : renderChat()}
