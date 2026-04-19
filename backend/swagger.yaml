@@ -39,7 +39,6 @@ paths:
   /login:
     post:
       tags: [Auth]
-      # ยิงไปเพื่อเช็ค Username/Password แล้วขอรับ Token
       summary: Login
       security: []
       requestBody:
@@ -60,7 +59,6 @@ paths:
   /register:
     post:
       tags: [Auth]
-      # ยิงข้อมูลไปพื่อสมัครเป็นสมาชิกระดับ User
       summary: Register a new user
       security: [] 
       requestBody:
@@ -74,6 +72,12 @@ paths:
                   type: string
                 password:
                   type: string
+                fullName:
+                  type: string
+                email:
+                  type: string
+                phoneNumber:
+                  type: string
       responses:
         '201':
           description: User registered successfully
@@ -81,7 +85,6 @@ paths:
   /me:
     get:
       tags: [Auth]
-      # ยิงพร้อมแนบ Token ไปเพื่อขอข้อมูลจำเพาะเบื้องต้นของบัญชีที่ถือ Token อยู่
       summary: Get my Info
       responses:
         '200':
@@ -93,7 +96,6 @@ paths:
   /doctors:
     get:
       tags: [Appointments]
-      # ดึงรายชื่อหมอทั้งหมดมาโชว์ที่หน้าบ้าน (อาจจะพร้อมข้อมูลราคาหรือโรงพยาบาล)
       summary: Get all doctors
       responses:
         '200':
@@ -102,7 +104,6 @@ paths:
   /doctor-slots:
     get:
       tags: [Appointments]
-      # ดึงข้อมูลสล็อตเวลาที่หมอแต่ละคน "ว่าง" ใน "วันที่เลือก" มานำเสนอให้คนไข้กด
       summary: Get available slots
       parameters: 
         - in: query 
@@ -123,7 +124,6 @@ paths:
   /book:
     post:
       tags: [Appointments]
-      # คนไข้กดยืนยันการจองคิว ก็จะส่งข้อมูล หมอ, วันที่ และเวลา มารอลง Database
       summary: Book an appointment
       requestBody:
         required: true
@@ -142,10 +142,23 @@ paths:
         '200':
           description: Appointment booked successfully
           
+  /blocked-dates:
+    get:
+      tags: [Appointments]
+      summary: Get list of blocked dates for a doctor
+      parameters:
+        - in: query
+          name: doctorId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of dates
+          
   /my-appointments:
     get:
       tags: [Appointments]
-      # ยิงมารับประวัติการจองและใบนัดทั้งหมด "ของคนล็อกอินปัจจุบันเท่านั้น"
       summary: Get my appointments
       responses:
         '200':
@@ -157,7 +170,6 @@ paths:
   /add-doctor:
     post:
       tags: [Admin]
-      # ให้แอดมินสามารถเพิ่มข้อมูลประวัติคุณหมอคนใหม่เข้ามาในระบบได้
       summary: Add a new doctor
       requestBody:
         required: true
@@ -172,14 +184,23 @@ paths:
                   type: string
                 phoneNumber:
                   type: string
+                hospital:
+                  type: string
       responses:
         '201':
           description: Doctor created successfully
 
+  /all-appointments:
+    get:
+      tags: [Admin]
+      summary: Get all appointments (Admin only)
+      responses:
+        '200':
+          description: A list of all appointments
+
   /update-doctor/{id}: 
     put:
       tags: [Admin]
-      # อัปเดตข้อมูลแพทย์เก่า โดยอ้างอิงรหัสไอดีแพทย์ (ID) ที่ต่อมาด้านหลัง Path
       summary: Update doctor info
       parameters: 
         - in: path 
@@ -200,6 +221,8 @@ paths:
                   type: string
                 phoneNumber:
                   type: string
+                hospital:
+                  type: string
       responses:
         '200':
           description: Successfully updated
@@ -207,7 +230,6 @@ paths:
   /delete-doctor/{id}:
     delete:
       tags: [Admin]
-      # ลบหมอออกจากทะเบียนแบบถาวร โดยห้ามลบคนที่ยังติคคิวอยู่
       summary: Delete a doctor
       parameters:
         - in: path
@@ -222,7 +244,6 @@ paths:
   /unavailable:
     post:
       tags: [Admin]
-      # แอดมินบังคับล๊อก/บล็อกเวลาที่เกิดเหตุฉุกเฉินหรือหมอลางาน ทำให้คนไข้จองสล็อตนี้ไม่ได้
       summary: Set doctor unavailable slot
       requestBody:
         required: true
@@ -249,20 +270,69 @@ paths:
   /profile:
     get:
       tags: [Profile]
-      # ขอข้อมูลต่างๆ ของฉันแบบเต็มๆ เช่น รูป, การตั้งค่า, ชื่อจริง เพื่อเอาไปขึ้นหน้า Profile (หน้า UserDashboard)
       summary: Fetch Profile
       responses:
         '200':
           description: Success
+    put:
+      tags: [Profile]
+      summary: Update Profile
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                email:
+                  type: string
+                phoneNumber:
+                  type: string
+                profilePic:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Profile updated successfully
 
   # -----------------------------------------------
   # [หมวด SuperAdmin] สิทธิ์ขั้นสูงสุดของผู้ดูแลระบบแม่
   # -----------------------------------------------
-  /superadmin/users:
+  /superadmin/create-staff:
+    post:
+      tags: [SuperAdmin]
+      summary: Create admin staff account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                role:
+                  type: string
+                  enum: [admin]
+      responses:
+        '201':
+          description: Account created successfully
+
+  /superadmin/admin-count:
     get:
       tags: [SuperAdmin]
-      # เป็นแดชบอร์ดซุปเปอร์แอดมิน เพื่อแสดงฐานข้อมูลประชากรทั้งหมดแยกตามระดับตำแหน่ง และสคริปต์แก้ไข/จัดการ
-      summary: Get all system users
+      summary: Get count of admin users
+      responses:
+        '200':
+          description: Success
+
+  /superadmin/admins:
+    get:
+      tags: [SuperAdmin]
+      summary: Get list of all admin users
       responses:
         '200':
           description: Success
@@ -273,7 +343,6 @@ paths:
   /notifications:
     get:
       tags: [Notifications]
-      # ดึงข้อความแจ้งเตือนต่างๆ เช่น เตือนใกล้วันนัด หรือเตือนเมื่อจองสำเร็จ
       summary: Get user notifications
       responses:
         '200':
@@ -282,7 +351,6 @@ paths:
   /notifications/read:
     post:
       tags: [Notifications]
-      # เมื่อผู้ใช้เปิดดูกระดิ่งแจ้งเตือน ให้ยินมาตรงนี้เพื่อสแตมป์ว่า "อ่านแล้ว" จะได้ไม่ค้างตัวเลขแจ้งกวนใจ
       summary: Mark notifications as read
       responses:
         '200':
@@ -294,7 +362,6 @@ paths:
   /messages/{room}:
     get:
       tags: [Chat]
-      # ดึงประวัติการแชทรายห้องส่วนตัวออกมาจากฐานข้อมูล เพื่อนำมาแสดงในแอพ
       summary: Get chat messages by room
       parameters:
         - in: path
@@ -309,7 +376,6 @@ paths:
   /chat-users:
     get:
       tags: [Chat]
-      # ดึงรายชื่อผู้ใช้ทั้งหมดที่เคยคุยกับ Admin (ใช้ดึงรายชื่อมาเรียงคิวให้ Admin เลือกตอบ)
       summary: Get list of users who chatted with admin
       responses:
         '200':
