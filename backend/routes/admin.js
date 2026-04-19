@@ -6,7 +6,7 @@ const router = express.Router();
 
 // เส้นทางสำหรับเพิ่มข้อมูลแพทย์ (เฉพาะ Admin เท่านั้น)
 router.post('/add-doctor', authenticateToken, async (req, res) => {
-    const { fullName, specialty, phoneNumber } = req.body;
+    const { fullName, specialty, phoneNumber, hospital } = req.body;
 
     if (req.user.role !== 'admin') {
         return res.status(403).json({ message: 'Admin access required' });
@@ -18,7 +18,8 @@ router.post('/add-doctor', authenticateToken, async (req, res) => {
             .input('fullName', sql.NVARCHAR, fullName)
             .input('specialty', sql.NVARCHAR, specialty)
             .input('phoneNumber', sql.NVARCHAR, phoneNumber)
-            .query('INSERT INTO Doctors (FullName, Specialty, PhoneNumber) VALUES (@fullName, @specialty, @phoneNumber)');
+            .input('hospital', sql.NVARCHAR, hospital)
+            .query('INSERT INTO Doctors (FullName, Specialty, PhoneNumber, Hospital) VALUES (@fullName, @specialty, @phoneNumber, @hospital)');
 
         res.status(201).json({ message: 'Doctor details added successfully' });
     } catch (err) {
@@ -36,7 +37,7 @@ router.get('/admin-only', authenticateToken, (req, res) => {
 // แก้ไขข้อมูลแพทย์
 router.put('/update-doctor/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
-    const { fullName, specialty, phoneNumber } = req.body;
+    const { fullName, specialty, phoneNumber, hospital } = req.body;
 
     if (req.user.role !== 'admin') {
         return res.status(403).json({ message: 'Admin access required' });
@@ -49,7 +50,8 @@ router.put('/update-doctor/:id', authenticateToken, async (req, res) => {
             .input('fullName', sql.NVARCHAR, fullName)
             .input('specialty', sql.NVARCHAR, specialty)
             .input('phoneNumber', sql.NVARCHAR, phoneNumber)
-            .query('UPDATE Doctors SET FullName = @fullName, Specialty = @specialty, PhoneNumber = @phoneNumber WHERE Id = @id');
+            .input('hospital', sql.NVARCHAR, hospital)
+            .query('UPDATE Doctors SET FullName = @fullName, Specialty = @specialty, PhoneNumber = @phoneNumber, Hospital = @hospital WHERE Id = @id');
 
         if (result.rowsAffected[0] === 0) {
             return res.status(404).json({ message: 'Doctor not found' });

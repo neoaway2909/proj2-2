@@ -21,6 +21,7 @@ const AdminDashboard = () => {
     const [fullName, setFullName] = useState('');
     const [specialty, setSpecialty] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
+    const [hospital, setHospital] = useState('');
     const [editingDoctorId, setEditingDoctorId] = useState(null);
     
     // สถานะสำหรับการจัดการตารางเวลาของแพทย์
@@ -127,19 +128,19 @@ const AdminDashboard = () => {
             if (editingDoctorId) {
                 // อัปเดตข้อมูลหมอ
                 await axios.put(`${API_BASE_URL}/update-doctor/${editingDoctorId}`, {
-                    fullName, specialty, phoneNumber
+                    fullName, specialty, phoneNumber, hospital
                 }, config);
                 alert("แก้ไขข้อมูลหมอสำเร็จ");
                 setEditingDoctorId(null);
             } else {
                 // เพิ่มข้อมูลหมอใหม่
                 await axios.post(`${API_BASE_URL}/add-doctor`, {
-                    fullName, specialty, phoneNumber
+                    fullName, specialty, phoneNumber, hospital
                 }, config);
                 alert("บันทึกข้อมูลหมอสำเร็จ");
             }
             
-            setFullName(''); setSpecialty(''); setPhoneNumber('');
+            setFullName(''); setSpecialty(''); setPhoneNumber(''); setHospital('');
             fetchAllData();
         } catch (err) {
             alert(err.response?.data?.message || 'Action failed');
@@ -151,6 +152,7 @@ const AdminDashboard = () => {
         setFullName(doc.FullName);
         setSpecialty(doc.Specialty);
         setPhoneNumber(doc.PhoneNumber);
+        setHospital(doc.Hospital || '');
         window.scrollTo(0, 0);
     };
 
@@ -367,13 +369,17 @@ const AdminDashboard = () => {
                                     <label>เบอร์โทรศัพท์ติดต่อ</label>
                                     <input type="text" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} required placeholder="08x-xxx-xxxx" />
                                 </div>
+                                <div className="form-field">
+                                    <label>โรงพยาบาล</label>
+                                    <input type="text" value={hospital} onChange={(e) => setHospital(e.target.value)} required placeholder="ระบุชื่อโรงพยาบาล" />
+                                </div>
                                 <div style={{ display: 'flex', gap: '10px' }}>
                                     <button type="submit" className="save-schedule-btn" style={{ background: '#3b82f6', flex: 1, padding: '12px' }}>
                                         {editingDoctorId ? 'บันทึกการแก้ไข' : 'บันทึกข้อมูล'}
                                     </button>
                                     {editingDoctorId && (
                                         <button type="button" className="save-schedule-btn" style={{ background: '#94a3b8', width: 'auto', padding: '12px 20px' }} onClick={() => {
-                                            setEditingDoctorId(null); setFullName(''); setSpecialty(''); setPhoneNumber('');
+                                            setEditingDoctorId(null); setFullName(''); setSpecialty(''); setPhoneNumber(''); setHospital('');
                                         }}>ยกเลิก</button>
                                     )}
                                 </div>
@@ -393,6 +399,7 @@ const AdminDashboard = () => {
                                             <div>
                                                 <div style={{ fontWeight: 700, color: '#1e293b' }}>{doc.FullName}</div>
                                                 <div style={{ fontSize: '0.875rem', color: '#64748b' }}>{doc.Specialty} | {doc.PhoneNumber}</div>
+                                                <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{doc.Hospital}</div>
                                             </div>
                                         </div>
                                         <div style={{ display: 'flex', gap: '8px' }}>

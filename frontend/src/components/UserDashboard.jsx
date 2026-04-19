@@ -326,7 +326,7 @@ const UserDashboard = () => {
                     <div>
                         <h4 className="doc-name">{selectedDoctor.FullName}</h4>
                         <span className="doc-specialty">{selectedDoctor.Specialty}</span>
-                        <p className="hospital-name">Wattanapat Hospital</p>
+                        <p className="hospital-name">{selectedDoctor.Hospital || "Wattanapat Hospital"}</p>
                     </div>
                 </div>
                 <div className="booking-section">
