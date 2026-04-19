@@ -464,7 +464,16 @@ const AdminDashboard = () => {
                                                     })}
                                                 </div>
                                                 <div style={{ fontSize: '0.875rem', color: '#64748b' }}>
-                                                    เวลา {appt.AppointTime.substring(0, 5)} น.
+                                                    เวลา {(() => {
+                                                        const t = appt.AppointTime;
+                                                        if (!t) return '--:--';
+                                                        // ถ้าเป็น ISO String (เช่น 1970-01-01T09:00:00.000Z) ให้ดึงตำแหน่ง 11-16
+                                                        if (typeof t === 'string' && t.includes('T')) {
+                                                            return t.substring(11, 16);
+                                                        }
+                                                        // กรณีอื่นๆ เช่น มาเป็น HH:mm:ss เลย
+                                                        return String(t).substring(0, 5);
+                                                    })()} น.
                                                 </div>
                                             </td>
                                             <td style={{ padding: '1.25rem 1rem' }}>
